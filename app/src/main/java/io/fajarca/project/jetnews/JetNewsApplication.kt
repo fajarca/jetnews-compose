@@ -1,0 +1,11 @@
+package io.fajarca.project.jetnews
+
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class JetNewsApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+    }
+}
