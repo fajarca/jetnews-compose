@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews
+package io.fajarca.project.jetnews.infrastructure.coroutine
 
 import kotlinx.coroutines.CoroutineDispatcher
 

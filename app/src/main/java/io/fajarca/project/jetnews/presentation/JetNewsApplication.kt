@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews
+package io.fajarca.project.jetnews.presentation
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

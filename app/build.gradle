@@ -72,4 +72,15 @@ dependencies {
     kapt "androidx.hilt:hilt-lifecycle-viewmodel:$hilt_viewModel_version"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutine_version"
+
+    implementation "com.github.bumptech.glide:glide:$glideVersion"
+    kapt "com.github.bumptech.glide:compiler:$glideVersion"
+
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$loggingInterceptorVersion"
+
+    implementation "androidx.room:room-runtime:$roomVersion"
+    implementation "androidx.room:room-ktx:$roomVersion"
+    kapt "androidx.room:room-compiler:$roomVersion"
 }

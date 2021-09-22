@@ -5,6 +5,10 @@ buildscript {
         hilt_version = '2.37'
         hilt_viewModel_version = '1.0.0-alpha01'
         coroutine_version = '1.5.2'
+        glideVersion = '4.12.0'
+        roomVersion = '2.3.0'
+        retrofitVersion = '2.9.0'
+        loggingInterceptorVersion = '4.9.0'
     }
     repositories {
         google()
