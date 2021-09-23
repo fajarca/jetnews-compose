@@ -1,8 +1,9 @@
 package io.fajarca.project.jetnews.domain.repository
 
-import io.fajarca.project.jetnews.domain.Either
 import io.fajarca.project.jetnews.domain.entity.TopHeadline
+import kotlinx.coroutines.flow.Flow
 
 interface NewsRepository {
-    suspend fun getTopHeadlines() : Either<Exception, List<TopHeadline>>
+    suspend fun getTopHeadlines() : Flow<List<TopHeadline>>
+    suspend fun getNewsSource() : Flow<List<String>>
 }

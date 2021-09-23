@@ -13,4 +13,7 @@ abstract class TopHeadlineDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertAll(vararg movie: TopHeadlineEntity)
+
+    @Query("SELECT DISTINCT source FROM top_headlines")
+    abstract fun findAllNewsSource(): Flow<List<String>>
 }

@@ -14,6 +14,10 @@ class NewsLocalDataSource @Inject constructor(
         return dao.findAll().distinctUntilChanged()
     }
 
+    fun findAllNewsSource(): Flow<List<String>> {
+        return dao.findAllNewsSource()
+    }
+
     suspend fun insertAll(headlines : List<TopHeadlineEntity>) {
         dao.insertAll(*headlines.toTypedArray())
     }

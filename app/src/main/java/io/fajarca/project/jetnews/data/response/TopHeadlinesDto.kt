@@ -4,7 +4,7 @@ import com.squareup.moshi.Json
 
 data class TopHeadlinesDto(
     @field:Json(name = "articles")
-    val articles: List<Article?>? = null
+    val articles: List<Article> = emptyList()
 ) {
     data class Article(
         @field:Json(name = "author")

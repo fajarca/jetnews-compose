@@ -4,5 +4,6 @@ import io.fajarca.project.jetnews.domain.entity.TopHeadline
 
 data class MovieUiState(
     val topHeadlines: List<TopHeadline> = emptyList(),
-    val isLoading: Boolean
+    val isLoading: Boolean,
+    val newsSource : List<String> = emptyList()
 )

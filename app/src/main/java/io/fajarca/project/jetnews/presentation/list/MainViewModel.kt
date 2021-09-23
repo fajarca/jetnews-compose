@@ -3,12 +3,13 @@ package io.fajarca.project.jetnews.presentation.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.fajarca.project.jetnews.domain.Either
+import io.fajarca.project.jetnews.domain.usecase.GetNewsSourceUseCase
 import io.fajarca.project.jetnews.domain.usecase.GetTopHeadlinesUseCase
 import io.fajarca.project.jetnews.infrastructure.coroutine.CoroutineDispatcherProvider
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase,
+    private val getNewsSourceUseCase: GetNewsSourceUseCase,
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider
 ) : ViewModel() {
 
@@ -28,13 +30,21 @@ class MainViewModel @Inject constructor(
 
     private fun getPosts() {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
-            _uiState.update {
-                val topHeadlines = getTopHeadlinesUseCase.execute()
-                when (topHeadlines) {
-                    is Either.Left -> it.copy(emptyList(), false)
-                    is Either.Right -> it.copy(topHeadlines.data, false)
+            getTopHeadlinesUseCase.execute().collect { headlines ->
+                _uiState.update { uiState ->
+                    uiState.copy(topHeadlines = headlines, isLoading = false)
                 }
             }
+
+        }
+    }
+
+    fun getNewsSource() {
+        viewModelScope.launch(coroutineDispatcherProvider.io) {
+            getNewsSourceUseCase.execute().collect { sources ->
+                _uiState.update { uiState -> uiState.copy(isLoading = false, newsSource = sources) }
+            }
+
         }
     }
 }

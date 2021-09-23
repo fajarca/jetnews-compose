@@ -6,10 +6,10 @@ import io.fajarca.project.jetnews.domain.entity.TopHeadline
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-class GetTopHeadlinesUseCase @Inject constructor(private val repository: NewsRepository){
+class GetNewsSourceUseCase @Inject constructor(private val repository: NewsRepository){
 
-    suspend fun execute(): Flow<List<TopHeadline>> {
-        return repository.getTopHeadlines()
+    suspend fun execute(): Flow<List<String>> {
+        return repository.getNewsSource()
     }
 
 }
