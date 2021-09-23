@@ -1,6 +1,5 @@
 package io.fajarca.project.jetnews.presentation.list
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,16 +28,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
 import io.fajarca.project.jetnews.domain.entity.TopHeadline
 import io.fajarca.project.jetnews.ui.components.FullscreenLoading
+import io.fajarca.project.jetnews.ui.components.RemoteImage
 
 
 @Composable
@@ -111,10 +108,10 @@ fun NewsItem(
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-            NewsImage(
-                headline.imageUrl,
-                Modifier
-                    .size(120.dp)
+            RemoteImage(
+                url = headline.imageUrl,
+                modifier = Modifier.size(120.dp),
+                contentScale = ContentScale.FillHeight
             )
 
             Column(modifier = Modifier.weight(1f)) {
@@ -143,18 +140,6 @@ fun NewsItem(
     }
 
 
-}
-
-@ExperimentalCoilApi
-@Composable
-fun NewsImage(url: String, modifier: Modifier) {
-    Image(
-        painter = rememberImagePainter(url),
-        contentDescription = null,
-        modifier = modifier,
-        alignment = Alignment.Center,
-        contentScale = ContentScale.FillHeight
-    )
 }
 
 @Composable
