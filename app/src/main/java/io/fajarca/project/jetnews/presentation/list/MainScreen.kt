@@ -30,10 +30,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.fajarca.project.jetnews.domain.entity.TopHeadline
+import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.ui.components.FullscreenLoading
 import io.fajarca.project.jetnews.ui.components.RemoteImage
 
@@ -51,11 +53,12 @@ fun MainScreen(viewModel: MainViewModel) {
             FullscreenLoading()
         }
 
+        val context = LocalContext.current
         NewsList(
             topHeadlines = uiState.topHeadlines,
             modifier = Modifier.weight(1f),
             onToggleBookmark = { title -> viewModel.toggleFavorite(title) },
-            onHeadlineSelect = { headline -> }
+            onHeadlineSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
         )
     }
 }
