@@ -5,5 +5,6 @@ data class TopHeadline(
     val publishedAt: String,
     val title: String,
     val url: String,
-    val imageUrl: String
+    val imageUrl: String,
+    val source : String
 )

@@ -13,7 +13,8 @@ class TopHeadlinesMapper @Inject constructor() {
                 it?.publishedAt.orEmpty(),
                 it?.title.orEmpty(),
                 it?.url.orEmpty(),
-                it?.urlToImage.orEmpty()
+                it?.urlToImage.orEmpty(),
+                it?.source?.name.orEmpty(),
             )
         } ?: emptyList()
     }
