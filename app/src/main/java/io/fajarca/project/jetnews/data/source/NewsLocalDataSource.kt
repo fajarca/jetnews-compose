@@ -22,4 +22,7 @@ class NewsLocalDataSource @Inject constructor(
         dao.insertAll(*headlines.toTypedArray())
     }
 
+    suspend fun toggleFavorite(title : String): Int {
+        return dao.toggleFavorite(title)
+    }
 }

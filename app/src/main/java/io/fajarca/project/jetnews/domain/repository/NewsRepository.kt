@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface NewsRepository {
     suspend fun getTopHeadlines() : Flow<List<TopHeadline>>
     suspend fun getNewsSource() : Flow<List<String>>
+    suspend fun toggleBookmark(title : String) : Int
 }

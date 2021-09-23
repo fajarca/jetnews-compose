@@ -1,6 +1,5 @@
 package io.fajarca.project.jetnews.presentation.list
 
-import android.content.res.Configuration
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,14 +16,15 @@ import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.IconToggleButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BookmarkBorder
-import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -56,7 +56,9 @@ fun MainScreen(viewModel: MainViewModel) {
 
         NewsList(
             topHeadlines = uiState.topHeadlines,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            onToggleBookmark = { title -> viewModel.toggleFavorite(title) },
+            onHeadlineSelect = { headline -> }
         )
     }
 }
@@ -71,22 +73,35 @@ fun AppBar(onSearchClicked: () -> Unit) {
 }
 
 @Composable
-fun NewsList(topHeadlines: List<TopHeadline>, modifier: Modifier = Modifier) {
+fun NewsList(
+    topHeadlines: List<TopHeadline>,
+    modifier: Modifier = Modifier,
+    onToggleBookmark: (String) -> Unit,
+    onHeadlineSelect: (TopHeadline) -> Unit
+) {
     val listState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = listState) {
         items(items = topHeadlines) {
-            NewsItem(it)
+            NewsItem(
+                headline = it,
+                onToggleBookmark = onToggleBookmark,
+                onHeadlineSelect = onHeadlineSelect
+            )
         }
     }
 }
 
 @Composable
-fun NewsItem(headline: TopHeadline) {
+fun NewsItem(
+    headline: TopHeadline,
+    onToggleBookmark: (String) -> Unit,
+    onHeadlineSelect: (TopHeadline) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {}
             .padding(8.dp)
+            .clickable { onHeadlineSelect(headline) }
     ) {
 
         Row(
@@ -119,7 +134,10 @@ fun NewsItem(headline: TopHeadline) {
 
             }
 
-            Icon(Icons.Outlined.BookmarkBorder, null)
+            BookmarkButton(
+                isBookmarked = headline.isBookmarked,
+                onClick = { onToggleBookmark(headline.title) })
+
         }
 
     }
@@ -139,8 +157,17 @@ fun NewsImage(url: String, modifier: Modifier) {
     )
 }
 
-@Preview("Headline news")
-@Preview("Headline news (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
+    IconToggleButton(checked = isBookmarked, onCheckedChange = { onClick() }) {
+        Icon(
+            imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+            contentDescription = if (isBookmarked) "Bookmarked" else "Unbookmark"
+        )
+    }
+}
+
+@Preview("Headline news (bookmarked)")
 @Composable
 fun NewsItemPreview() {
     NewsItem(
@@ -151,7 +178,33 @@ fun NewsItemPreview() {
             "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
             "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
             "Kontan.co.id",
-            false
-        )
+            true,
+        ),
+        {},
+        {}
     )
+}
+
+@Preview("Headline news")
+@Composable
+fun NewsItemBookmarkedPreview() {
+    NewsItem(
+        TopHeadline(
+            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
+            "2021-09-23T05:55:54Z",
+            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
+            "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
+            "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
+            "Kontan.co.id",
+            false,
+        ),
+        {},
+        {}
+    )
+}
+
+@Preview("Toolbar")
+@Composable
+fun ToolbarPreview() {
+    AppBar({})
 }

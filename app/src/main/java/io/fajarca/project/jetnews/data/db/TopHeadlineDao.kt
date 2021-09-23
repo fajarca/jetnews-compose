@@ -16,4 +16,7 @@ abstract class TopHeadlineDao {
 
     @Query("SELECT DISTINCT source FROM top_headlines")
     abstract fun findAllNewsSource(): Flow<List<String>>
+
+    @Query("UPDATE top_headlines SET bookmark = NOT bookmark WHERE title = :title")
+    abstract suspend fun toggleFavorite(title: String): Int
 }

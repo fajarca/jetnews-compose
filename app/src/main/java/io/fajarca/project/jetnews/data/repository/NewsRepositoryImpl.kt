@@ -32,4 +32,8 @@ class NewsRepositoryImpl @Inject constructor(
         return localDataSource.findAllNewsSource()
     }
 
+    override suspend fun toggleBookmark(title : String): Int {
+        return localDataSource.toggleFavorite(title)
+    }
+
 }
