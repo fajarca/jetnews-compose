@@ -6,13 +6,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.IconToggleButton
@@ -39,7 +40,6 @@ import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.ui.components.FullscreenLoading
 import io.fajarca.project.jetnews.ui.components.RemoteImage
 
-
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
@@ -53,11 +53,12 @@ fun MainScreen(viewModel: MainViewModel) {
             FullscreenLoading()
         }
 
+        Divider()
         val context = LocalContext.current
         NewsList(
             topHeadlines = uiState.topHeadlines,
             modifier = Modifier.weight(1f),
-            onToggleBookmark = { title -> viewModel.toggleFavorite(title) },
+            onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
             onHeadlineSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
         )
     }
@@ -81,12 +82,18 @@ fun NewsList(
 ) {
     val listState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = listState) {
-        items(items = topHeadlines) {
-            NewsItem(
-                headline = it,
-                onToggleBookmark = onToggleBookmark,
-                onHeadlineSelect = onHeadlineSelect
-            )
+        itemsIndexed(items = topHeadlines) { index, headline ->
+            if (index == 0) {
+                NewsItemCard(headline = headline)
+            } else {
+                NewsItem(
+                    headline = headline,
+                    onToggleBookmark = onToggleBookmark,
+                    onHeadlineSelect = onHeadlineSelect
+                )
+                Divider()
+            }
+
         }
     }
 }
@@ -97,51 +104,78 @@ fun NewsItem(
     onToggleBookmark: (String) -> Unit,
     onHeadlineSelect: (TopHeadline) -> Unit
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .clickable { onHeadlineSelect(headline) }
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
+        RemoteImage(
+            url = headline.imageUrl,
+            modifier = Modifier.size(120.dp),
+            contentScale = ContentScale.FillHeight
+        )
 
-            RemoteImage(
-                url = headline.imageUrl,
-                modifier = Modifier.size(120.dp),
-                contentScale = ContentScale.FillHeight
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = headline.title,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.subtitle1
             )
 
-            Column(modifier = Modifier.weight(1f)) {
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
-                    text = headline.title,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.subtitle1
+                    text = headline.source,
+                    style = MaterialTheme.typography.body2
                 )
-
-                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                    Text(
-                        text = headline.source,
-                        style = MaterialTheme.typography.body2
-                    )
-                }
-
             }
 
-            BookmarkButton(
-                isBookmarked = headline.isBookmarked,
-                onClick = { onToggleBookmark(headline.title) })
+            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                Text(
+                    text = headline.publishedAt,
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
 
         }
 
-    }
+        BookmarkButton(
+            isBookmarked = headline.isBookmarked,
+            onClick = { onToggleBookmark(headline.title) })
 
+    }
+}
+
+
+@Composable
+fun NewsItemCard(headline: TopHeadline) {
+    Column {
+        RemoteImage(
+            url = headline.imageUrl,
+            modifier = Modifier.height(220.dp),
+            contentScale = ContentScale.FillBounds
+        )
+
+        Text(
+            text = headline.title,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.subtitle1,
+            modifier = Modifier.padding(8.dp)
+        )
+
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Text(
+                text = headline.description,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
+            )
+        }
+    }
 
 }
 
@@ -197,4 +231,20 @@ fun NewsItemBookmarkedPreview() {
 @Composable
 fun ToolbarPreview() {
     AppBar({})
+}
+
+@Preview("News Item Card")
+@Composable
+fun NewsItemCardPreview() {
+    NewsItemCard(
+        headline = TopHeadline(
+            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
+            "2021-09-23T05:55:54Z",
+            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
+            "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
+            "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
+            "Kontan.co.id",
+            false,
+        )
+    )
 }

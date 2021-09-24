@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class TopHeadlineDao {
-    @Query("SELECT * FROM top_headlines")
+    @Query("SELECT * FROM top_headlines ORDER BY published_at DESC")
     abstract fun findAll(): Flow<List<TopHeadlineEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

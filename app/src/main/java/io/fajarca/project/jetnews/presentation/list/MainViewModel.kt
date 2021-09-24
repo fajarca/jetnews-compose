@@ -50,7 +50,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun toggleFavorite(title: String) {
+    fun toggleBookmark(title: String) {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
             toggleBookmarkUseCase.execute(title)
         }

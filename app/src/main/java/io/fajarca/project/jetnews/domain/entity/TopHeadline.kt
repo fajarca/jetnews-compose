@@ -6,6 +6,6 @@ data class TopHeadline(
     val title: String,
     val url: String,
     val imageUrl: String,
-    val source : String,
-    val isBookmarked : Boolean
+    val source: String,
+    val isBookmarked: Boolean
 )
