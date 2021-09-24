@@ -147,11 +147,13 @@ fun NewsItem(
 
 @Composable
 fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
-    IconToggleButton(checked = isBookmarked, onCheckedChange = { onClick() }) {
-        Icon(
-            imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-            contentDescription = if (isBookmarked) "Bookmarked" else "Unbookmark"
-        )
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+        IconToggleButton(checked = isBookmarked, onCheckedChange = { onClick() }) {
+            Icon(
+                imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                contentDescription = if (isBookmarked) "Bookmarked" else "Unbookmark",
+            )
+        }
     }
 }
 

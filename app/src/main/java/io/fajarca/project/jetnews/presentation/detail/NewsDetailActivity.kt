@@ -28,7 +28,7 @@ class NewsDetailActivity : AppCompatActivity() {
         handleIntentArguments()
         setContent {
             MaterialTheme {
-                NewsDetailScreen(url = url)
+                NewsDetailScreen(url = url, onNavigationIconClick = { finish() })
             }
         }
     }
