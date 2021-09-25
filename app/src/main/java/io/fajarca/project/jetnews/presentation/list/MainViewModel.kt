@@ -2,7 +2,11 @@ package io.fajarca.project.jetnews.presentation.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.fajarca.project.jetnews.data.db.TopHeadlineDao
+import io.fajarca.project.jetnews.data.source.NewsRemoteMediator
 import io.fajarca.project.jetnews.domain.usecase.GetNewsSourceUseCase
 import io.fajarca.project.jetnews.domain.usecase.GetTopHeadlinesUseCase
 import io.fajarca.project.jetnews.domain.usecase.ToggleBookmarkUseCase
@@ -20,17 +24,17 @@ class MainViewModel @Inject constructor(
     private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase,
     private val getNewsSourceUseCase: GetNewsSourceUseCase,
     private val toggleBookmarkUseCase: ToggleBookmarkUseCase,
-    private val coroutineDispatcherProvider: CoroutineDispatcherProvider
+    private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
+    private val newsRemoteMediator: NewsRemoteMediator,
+    private val dao: TopHeadlineDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MovieUiState(isLoading = true))
     val uiState: StateFlow<MovieUiState> = _uiState
 
-    init {
-        getPosts()
-    }
 
-    private fun getPosts() {
+
+    /*private fun getPosts() {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
             getTopHeadlinesUseCase.execute().collect { headlines ->
                 _uiState.update { uiState ->
@@ -39,7 +43,7 @@ class MainViewModel @Inject constructor(
             }
 
         }
-    }
+    }*/
 
     fun getNewsSource() {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
@@ -55,4 +59,7 @@ class MainViewModel @Inject constructor(
             toggleBookmarkUseCase.execute(title)
         }
     }
+
+
+    val pager = getTopHeadlinesUseCase.execute()
 }

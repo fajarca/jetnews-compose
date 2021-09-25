@@ -5,12 +5,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
@@ -35,28 +35,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import io.fajarca.project.jetnews.domain.entity.TopHeadline
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
-import io.fajarca.project.jetnews.ui.components.FullscreenLoading
 import io.fajarca.project.jetnews.ui.components.RemoteImage
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Column(modifier = Modifier.fillMaxHeight()) {
+    val headlines: LazyPagingItems<TopHeadline> = viewModel.pager.collectAsLazyPagingItems()
+
+
+    Column(modifier = Modifier.fillMaxSize()) {
         AppBar(onSearchClicked = {
             viewModel.getNewsSource()
         })
-
-        if (uiState.isLoading) {
-            FullscreenLoading()
-        }
-
-        Divider()
         val context = LocalContext.current
         NewsList(
-            topHeadlines = uiState.topHeadlines,
+            topHeadlines = headlines,
             modifier = Modifier.weight(1f),
             onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
             onHeadlineSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
@@ -75,25 +74,20 @@ fun AppBar(onSearchClicked: () -> Unit) {
 
 @Composable
 fun NewsList(
-    topHeadlines: List<TopHeadline>,
+    topHeadlines: LazyPagingItems<TopHeadline>,
     modifier: Modifier = Modifier,
     onToggleBookmark: (String) -> Unit,
     onHeadlineSelect: (TopHeadline) -> Unit
 ) {
     val listState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = listState) {
-        itemsIndexed(items = topHeadlines) { index, headline ->
-            if (index == 0) {
-                NewsItemCard(headline = headline)
-            } else {
-                NewsItem(
-                    headline = headline,
-                    onToggleBookmark = onToggleBookmark,
-                    onHeadlineSelect = onHeadlineSelect
-                )
-                Divider()
-            }
-
+        items(topHeadlines) {
+            NewsItem(
+                headline = it ?: return@items,
+                onToggleBookmark = onToggleBookmark,
+                onHeadlineSelect = onHeadlineSelect
+            )
+            Divider()
         }
     }
 }

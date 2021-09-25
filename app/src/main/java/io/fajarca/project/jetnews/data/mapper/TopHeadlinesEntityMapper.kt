@@ -21,19 +21,16 @@ class TopHeadlinesEntityMapper @Inject constructor() {
         }
     }
 
-    fun fromEntity(input: List<TopHeadlineEntity>): List<TopHeadline> {
-        return input.map {
-            TopHeadline(
-                title = it.title,
-                description = it.description,
-                url = it.url,
-                imageUrl = it.imageUrl,
-                publishedAt = it.publishedAt,
-                source = it.source,
-                isBookmarked = it.isBookmarked
-            )
-        }
-
+    fun fromEntity(input: TopHeadlineEntity): TopHeadline {
+        return TopHeadline(
+            title = input.title,
+            description = input.description,
+            url = input.url,
+            imageUrl = input.imageUrl,
+            publishedAt = input.publishedAt,
+            source = input.source,
+            isBookmarked = input.isBookmarked
+        )
     }
 
 }

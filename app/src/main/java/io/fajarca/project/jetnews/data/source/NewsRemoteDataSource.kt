@@ -11,8 +11,8 @@ class NewsRemoteDataSource @Inject constructor(
     private val newsService: NewsService
 ) {
 
-    suspend fun getTopHeadlines(): Either<Exception, TopHeadlinesDto> {
-        return apiClient.call { newsService.getTopHeadlines() }
+    suspend fun getTopHeadlines(country : String, page : Int, size : Int): Either<Exception, TopHeadlinesDto> {
+        return apiClient.call { newsService.getTopHeadlines(country, page, size) }
     }
 
 
