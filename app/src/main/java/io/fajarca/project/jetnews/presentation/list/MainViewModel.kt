@@ -25,25 +25,18 @@ class MainViewModel @Inject constructor(
     private val getNewsSourceUseCase: GetNewsSourceUseCase,
     private val toggleBookmarkUseCase: ToggleBookmarkUseCase,
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
-    private val newsRemoteMediator: NewsRemoteMediator,
-    private val dao: TopHeadlineDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MovieUiState(isLoading = true))
     val uiState: StateFlow<MovieUiState> = _uiState
 
+    init {
+        getPosts()
+    }
 
-
-    /*private fun getPosts() {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
-            getTopHeadlinesUseCase.execute().collect { headlines ->
-                _uiState.update { uiState ->
-                    uiState.copy(topHeadlines = headlines, isLoading = false)
-                }
-            }
-
-        }
-    }*/
+    private fun getPosts() {
+        _uiState.update { uiState -> uiState.copy(headlines = getTopHeadlinesUseCase.execute()) }
+    }
 
     fun getNewsSource() {
         viewModelScope.launch(coroutineDispatcherProvider.io) {
@@ -61,5 +54,4 @@ class MainViewModel @Inject constructor(
     }
 
 
-    val pager = getTopHeadlinesUseCase.execute()
 }

@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 
 
 @Composable
-fun FullscreenLoading() {
+fun CenteredCircularProgressIndicator() {
     Box(modifier = Modifier.fillMaxSize()) {
         CircularProgressIndicator(
             modifier = Modifier

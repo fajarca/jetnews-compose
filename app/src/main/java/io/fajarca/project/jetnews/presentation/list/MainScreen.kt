@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -30,24 +30,24 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import io.fajarca.project.jetnews.domain.entity.TopHeadline
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
+import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
 import io.fajarca.project.jetnews.ui.components.RemoteImage
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
-
-    val headlines: LazyPagingItems<TopHeadline> = viewModel.pager.collectAsLazyPagingItems()
-
 
     Column(modifier = Modifier.fillMaxSize()) {
         AppBar(onSearchClicked = {
@@ -55,7 +55,7 @@ fun MainScreen(viewModel: MainViewModel) {
         })
         val context = LocalContext.current
         NewsList(
-            topHeadlines = headlines,
+            topHeadlines = uiState.headlines.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),
             onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
             onHeadlineSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
@@ -81,6 +81,7 @@ fun NewsList(
 ) {
     val listState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = listState) {
+
         items(topHeadlines) {
             NewsItem(
                 headline = it ?: return@items,
@@ -88,6 +89,18 @@ fun NewsList(
                 onHeadlineSelect = onHeadlineSelect
             )
             Divider()
+        }
+
+        topHeadlines.apply {
+            when {
+                loadState.refresh is LoadState.Loading -> {
+                    item { CenteredCircularProgressIndicator() }
+                }
+                loadState.append is LoadState.Loading -> {
+                    item { CenteredCircularProgressIndicator() }
+                }
+
+            }
         }
     }
 }
@@ -108,34 +121,13 @@ fun NewsItem(
 
         RemoteImage(
             url = headline.imageUrl,
-            modifier = Modifier.size(120.dp),
+            modifier = Modifier
+                .size(120.dp)
+                .clip(RoundedCornerShape(8.dp)),
             contentScale = ContentScale.FillHeight
         )
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = headline.title,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.subtitle1
-            )
-
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text(
-                    text = headline.source,
-                    style = MaterialTheme.typography.body2
-                )
-            }
-
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text(
-                    text = headline.publishedAt,
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-
-        }
+        NewsContent(headline = headline, Modifier.weight(1f))
 
         BookmarkButton(
             isBookmarked = headline.isBookmarked,
@@ -144,6 +136,45 @@ fun NewsItem(
     }
 }
 
+@Composable
+fun NewsContent(headline: TopHeadline, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(
+            text = headline.title,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.subtitle1
+        )
+
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Text(
+                text = headline.source,
+                style = MaterialTheme.typography.body2
+            )
+        }
+
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Text(
+                text = headline.publishedAt,
+                style = MaterialTheme.typography.body2,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
+    }
+}
+
+@Composable
+fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+        IconToggleButton(checked = isBookmarked, onCheckedChange = { onClick() }) {
+            Icon(
+                imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                contentDescription = if (isBookmarked) "Bookmarked" else "Unbookmark",
+            )
+        }
+    }
+}
 
 @Composable
 fun NewsItemCard(headline: TopHeadline) {
@@ -173,17 +204,6 @@ fun NewsItemCard(headline: TopHeadline) {
 
 }
 
-@Composable
-fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
-    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-        IconToggleButton(checked = isBookmarked, onCheckedChange = { onClick() }) {
-            Icon(
-                imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                contentDescription = if (isBookmarked) "Bookmarked" else "Unbookmark",
-            )
-        }
-    }
-}
 
 @Preview("Headline news (bookmarked)")
 @Composable
@@ -221,11 +241,6 @@ fun NewsItemBookmarkedPreview() {
     )
 }
 
-@Preview("Toolbar")
-@Composable
-fun ToolbarPreview() {
-    AppBar({})
-}
 
 @Preview("News Item Card")
 @Composable

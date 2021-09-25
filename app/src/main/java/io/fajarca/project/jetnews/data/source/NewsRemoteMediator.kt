@@ -9,7 +9,7 @@ import androidx.room.withTransaction
 import io.fajarca.project.jetnews.data.db.AppDatabase
 import io.fajarca.project.jetnews.data.db.TopHeadlineEntity
 import io.fajarca.project.jetnews.data.mapper.TopHeadlinesEntityMapper
-import io.fajarca.project.jetnews.data.service.NewsService
+import io.fajarca.project.jetnews.util.extension.getOrNull
 import javax.inject.Inject
 import okio.IOException
 import retrofit2.HttpException
@@ -18,10 +18,8 @@ import retrofit2.HttpException
 class NewsRemoteMediator @Inject constructor(
     private val entityMapper: TopHeadlinesEntityMapper,
     private val database: AppDatabase,
-    private val newsService: NewsService
+    private val remoteDataSource: NewsRemoteDataSource
 ) : RemoteMediator<Int, TopHeadlineEntity>() {
-
-    private val dao = database.topHeadlineDao()
 
     private var currentPage = 1
 
@@ -31,35 +29,31 @@ class NewsRemoteMediator @Inject constructor(
     ): MediatorResult {
 
         return try {
-            when(loadType) {
+            when (loadType) {
                 LoadType.REFRESH -> {
-                    Log.d("Paging", "State refresh")
                     null
                 }
-                LoadType.PREPEND ->    {
-                    Log.d("Paging", "State prepend")
-                   return MediatorResult.Success(endOfPaginationReached = true)
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(endOfPaginationReached = true)
                 }
                 LoadType.APPEND -> {
-                    Log.d("Paging", "State append")
-
-
                     currentPage++
-                    Log.d("Paging", "State append. Current page is $currentPage")
                 }
             }
 
 
             Log.d("Paging", "Load key is $currentPage")
 
-            val response = newsService.getTopHeadlines("id", currentPage ?: 1 , state.config.pageSize)
+            val response =
+                remoteDataSource.getTopHeadlines("id", currentPage, state.config.pageSize).getOrNull()
+
             database.withTransaction {
-                val headlines = entityMapper.toEntity(response)
-                dao.insertAll(*headlines.toTypedArray())
+                val headlines = entityMapper.toEntity(response ?: return@withTransaction)
+                database.topHeadlineDao().insertAll(*headlines.toTypedArray())
             }
 
             MediatorResult.Success(
-                endOfPaginationReached = response.articles.isEmpty()
+                endOfPaginationReached = response?.articles?.isEmpty() ?: false
             )
 
         } catch (e: IOException) {

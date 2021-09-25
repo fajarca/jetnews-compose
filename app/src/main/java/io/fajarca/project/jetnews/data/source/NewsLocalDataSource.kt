@@ -18,10 +18,6 @@ class NewsLocalDataSource @Inject constructor(
         return dao.findAllNewsSource()
     }
 
-    suspend fun insertAll(headlines : List<TopHeadlineEntity>) {
-        dao.insertAll(*headlines.toTypedArray())
-    }
-
     suspend fun toggleFavorite(title : String): Int {
         return dao.toggleFavorite(title)
     }
