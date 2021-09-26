@@ -42,6 +42,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
+import androidx.paging.compose.itemsIndexed
 import io.fajarca.project.jetnews.domain.entity.TopHeadline
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
@@ -82,9 +83,16 @@ fun NewsList(
     val listState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = listState) {
 
-        items(topHeadlines) {
+        itemsIndexed(lazyPagingItems = topHeadlines) { index, items ->
+            if (index == 0) {
+                BannerNewsItem(
+                    headline = items ?: return@itemsIndexed,
+                    onHeadlineSelect = onHeadlineSelect
+                )
+                Divider()
+            }
             NewsItem(
-                headline = it ?: return@items,
+                headline = items ?: return@itemsIndexed,
                 onToggleBookmark = onToggleBookmark,
                 onHeadlineSelect = onHeadlineSelect
             )
@@ -177,8 +185,8 @@ fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun NewsItemCard(headline: TopHeadline) {
-    Column {
+fun BannerNewsItem(headline: TopHeadline, onHeadlineSelect: (TopHeadline) -> Unit) {
+    Column(modifier = Modifier.clickable { onHeadlineSelect(headline) }) {
         RemoteImage(
             url = headline.imageUrl,
             modifier = Modifier.height(220.dp),
@@ -261,10 +269,10 @@ fun NewsItemBookmarkedDarkPreview() {
 }
 
 
-@Preview("News Item Card")
+@Preview("Banner Item Card")
 @Composable
-fun NewsItemCardPreview() {
-    NewsItemCard(
+fun BannerItemCardPreview() {
+    BannerNewsItem(
         headline = TopHeadline(
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
             "2021-09-23T05:55:54Z",
@@ -273,6 +281,7 @@ fun NewsItemCardPreview() {
             "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
             "Kontan.co.id",
             false,
-        )
+        ),
+        {}
     )
 }
