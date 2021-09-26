@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import io.fajarca.project.jetnews.R
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
@@ -21,6 +22,7 @@ fun RemoteImage(
         painter = rememberImagePainter(data = url, builder = {
             crossfade(true)
             placeholder(ColorDrawable(Color.LTGRAY))
+            error(R.drawable.ic_broken_image)
         }),
         contentDescription = null,
         modifier = modifier,

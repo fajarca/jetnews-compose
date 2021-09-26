@@ -1,6 +1,6 @@
 package io.fajarca.project.jetnews.data.source
 
-import android.util.Log
+import android.database.sqlite.SQLiteConstraintException
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
@@ -30,9 +30,7 @@ class NewsRemoteMediator @Inject constructor(
 
         return try {
             when (loadType) {
-                LoadType.REFRESH -> {
-                    null
-                }
+                LoadType.REFRESH -> null
                 LoadType.PREPEND -> {
                     return MediatorResult.Success(endOfPaginationReached = true)
                 }
@@ -41,15 +39,14 @@ class NewsRemoteMediator @Inject constructor(
                 }
             }
 
-
-            Log.d("Paging", "Load key is $currentPage")
-
             val response =
                 remoteDataSource.getTopHeadlines("id", currentPage, state.config.pageSize).getOrNull()
 
             database.withTransaction {
                 val headlines = entityMapper.toEntity(response ?: return@withTransaction)
-                database.topHeadlineDao().insertAll(*headlines.toTypedArray())
+                try {
+                    database.topHeadlineDao().insertAll(*headlines.toTypedArray())
+                } catch (e: SQLiteConstraintException) {}
             }
 
             MediatorResult.Success(

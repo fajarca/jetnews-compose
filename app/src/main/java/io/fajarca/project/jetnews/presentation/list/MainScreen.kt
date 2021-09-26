@@ -1,5 +1,6 @@
 package io.fajarca.project.jetnews.presentation.list
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -50,9 +52,7 @@ fun MainScreen(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppBar(onSearchClicked = {
-            viewModel.getNewsSource()
-        })
+        AppBar(onSearchClicked = { viewModel.getNewsSource() })
         val context = LocalContext.current
         NewsList(
             topHeadlines = uiState.headlines.collectAsLazyPagingItems(),
@@ -226,6 +226,25 @@ fun NewsItemPreview() {
 @Preview("Headline news")
 @Composable
 fun NewsItemBookmarkedPreview() {
+    NewsItem(
+        TopHeadline(
+            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
+            "2021-09-23T05:55:54Z",
+            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
+            "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
+            "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
+            "Kontan.co.id",
+            false,
+        ),
+        {},
+        {}
+    )
+}
+
+
+@Preview("Headline news (dark)", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun NewsItemBookmarkedDarkPreview() {
     NewsItem(
         TopHeadline(
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",

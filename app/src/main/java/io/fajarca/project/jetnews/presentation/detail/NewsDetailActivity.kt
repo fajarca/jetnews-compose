@@ -2,11 +2,10 @@ package io.fajarca.project.jetnews.presentation.detail
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.compose.material.MaterialTheme
-import io.fajarca.project.jetnews.presentation.JetNewsApp
+import androidx.appcompat.app.AppCompatActivity
+import io.fajarca.project.jetnews.ui.theme.JetNewsTheme
 
 class NewsDetailActivity : AppCompatActivity() {
 
@@ -27,7 +26,7 @@ class NewsDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         handleIntentArguments()
         setContent {
-            MaterialTheme {
+            JetNewsTheme {
                 NewsDetailScreen(url = url, onNavigationIconClick = { finish() })
             }
         }

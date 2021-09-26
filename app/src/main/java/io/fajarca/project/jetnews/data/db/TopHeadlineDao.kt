@@ -12,7 +12,7 @@ abstract class TopHeadlineDao {
     @Query("SELECT * FROM top_headlines ORDER BY published_at DESC")
     abstract fun findAll(): PagingSource<Int, TopHeadlineEntity>
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.ABORT)
     abstract suspend fun insertAll(vararg movie: TopHeadlineEntity)
 
     @Query("SELECT DISTINCT source FROM top_headlines")

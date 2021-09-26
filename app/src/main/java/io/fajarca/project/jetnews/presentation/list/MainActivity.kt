@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
 import dagger.hilt.android.AndroidEntryPoint
+import io.fajarca.project.jetnews.ui.theme.JetNewsTheme
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MaterialTheme {
+            JetNewsTheme {
                 MainScreen(viewModel)
             }
         }
