@@ -1,13 +1,13 @@
 package io.fajarca.project.jetnews.data.mapper
 
-import io.fajarca.project.jetnews.data.response.TopHeadlinesDto
-import io.fajarca.project.jetnews.domain.entity.TopHeadline
+import io.fajarca.project.jetnews.data.response.ArticlesDto
+import io.fajarca.project.jetnews.domain.entity.Article
 import javax.inject.Inject
 
-class TopHeadlinesMapper @Inject constructor() {
+class ArticlesMapper @Inject constructor() {
 
-    fun map(input: TopHeadlinesDto.Article): TopHeadline {
-        return TopHeadline(
+    fun map(input: ArticlesDto.Article): Article {
+        return Article(
             title = input.title.orEmpty(),
             description = input.description.orEmpty(),
             url = input.url.orEmpty(),

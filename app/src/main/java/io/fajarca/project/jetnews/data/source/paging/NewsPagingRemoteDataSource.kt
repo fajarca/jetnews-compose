@@ -2,17 +2,17 @@ package io.fajarca.project.jetnews.data.source.paging
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import io.fajarca.project.jetnews.data.response.TopHeadlinesDto
+import io.fajarca.project.jetnews.data.response.ArticlesDto
 import io.fajarca.project.jetnews.domain.Either
 import io.fajarca.project.jetnews.util.extension.getOrNull
 import javax.inject.Inject
 
 class NewsPagingRemoteDataSource @Inject constructor(
-    private val apiCall : suspend (Int, Int) -> Either<Exception, TopHeadlinesDto>
-) : PagingSource<Int, TopHeadlinesDto.Article>() {
+    private val apiCall : suspend (Int, Int) -> Either<Exception, ArticlesDto>
+) : PagingSource<Int, ArticlesDto.Article>() {
 
 
-    override fun getRefreshKey(state: PagingState<Int, TopHeadlinesDto.Article>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, ArticlesDto.Article>): Int? {
         // Try to find the page key of the closest page to anchorPosition, from
         // either the prevKey or the nextKey, but you need to handle nullability
         // here:
@@ -26,7 +26,7 @@ class NewsPagingRemoteDataSource @Inject constructor(
         }
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, TopHeadlinesDto.Article> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, ArticlesDto.Article> {
         return try {
             var nextPage = params.key ?: 1
 

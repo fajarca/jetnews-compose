@@ -25,7 +25,7 @@ class SearchNewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JetNewsTheme {
-                SearchNewsScreen(viewModel)
+                SearchNewsScreen(viewModel, onNavigationIconClick = { finish() })
             }
         }
     }

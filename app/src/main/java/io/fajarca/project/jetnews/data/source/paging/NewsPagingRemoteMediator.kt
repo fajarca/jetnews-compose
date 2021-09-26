@@ -7,8 +7,8 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import io.fajarca.project.jetnews.data.db.AppDatabase
-import io.fajarca.project.jetnews.data.db.TopHeadlineEntity
-import io.fajarca.project.jetnews.data.mapper.TopHeadlinesEntityMapper
+import io.fajarca.project.jetnews.data.db.ArticleEntity
+import io.fajarca.project.jetnews.data.mapper.ArticlesEntityMapper
 import io.fajarca.project.jetnews.data.source.NewsRemoteDataSource
 import io.fajarca.project.jetnews.util.extension.getOrNull
 import javax.inject.Inject
@@ -17,16 +17,16 @@ import retrofit2.HttpException
 
 @OptIn(ExperimentalPagingApi::class)
 class NewsPagingRemoteMediator @Inject constructor(
-    private val entityMapper: TopHeadlinesEntityMapper,
+    private val entityMapper: ArticlesEntityMapper,
     private val database: AppDatabase,
     private val remoteDataSource: NewsRemoteDataSource
-) : RemoteMediator<Int, TopHeadlineEntity>() {
+) : RemoteMediator<Int, ArticleEntity>() {
 
     private var currentPage = 1
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, TopHeadlineEntity>
+        state: PagingState<Int, ArticleEntity>
     ): MediatorResult {
 
         return try {
@@ -46,7 +46,7 @@ class NewsPagingRemoteMediator @Inject constructor(
             database.withTransaction {
                 val headlines = entityMapper.toEntity(response ?: return@withTransaction)
                 try {
-                    database.topHeadlineDao().insertAll(*headlines.toTypedArray())
+                    database.articleDao().insertAll(*headlines.toTypedArray())
                 } catch (e: SQLiteConstraintException) {}
             }
 

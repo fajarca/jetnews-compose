@@ -1,6 +1,6 @@
 package io.fajarca.project.jetnews.data.service
 
-import io.fajarca.project.jetnews.data.response.TopHeadlinesDto
+import io.fajarca.project.jetnews.data.response.ArticlesDto
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -10,7 +10,7 @@ interface NewsService {
         @Query("country") country: String = "id",
         @Query("page") page: Int,
         @Query("pageSize") size: Int
-    ): TopHeadlinesDto
+    ): ArticlesDto
 
     @GET("everything")
     suspend fun search(
@@ -18,5 +18,5 @@ interface NewsService {
         @Query("language") language: String = "en",
         @Query("page") page: Int,
         @Query("pageSize") size: Int
-    ): TopHeadlinesDto
+    ): ArticlesDto
 }

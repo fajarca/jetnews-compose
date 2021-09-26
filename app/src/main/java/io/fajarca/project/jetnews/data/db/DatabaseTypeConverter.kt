@@ -1,6 +1,7 @@
 package io.fajarca.project.jetnews.data.db
 
 import androidx.room.TypeConverter
+import java.util.*
 
 class DatabaseTypeConverter {
 
@@ -14,4 +15,13 @@ class DatabaseTypeConverter {
         return if (value) 1 else 0
     }
 
+    @TypeConverter
+    fun toDate(timestamp: Long?): Date? {
+        return timestamp?.let { Date(it) }
+    }
+
+    @TypeConverter
+    fun toTimestamp(date: Date?): Long? {
+        return date?.time
+    }
 }

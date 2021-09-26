@@ -36,14 +36,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import androidx.paging.compose.itemsIndexed
-import io.fajarca.project.jetnews.domain.entity.TopHeadline
+import io.fajarca.project.jetnews.domain.entity.Article
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.search.SearchNewsActivity
 import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
@@ -76,10 +74,10 @@ fun AppBar(onSearchClicked: () -> Unit) {
 
 @Composable
 fun NewsList(
-    topHeadlines: LazyPagingItems<TopHeadline>,
+    topHeadlines: LazyPagingItems<Article>,
     modifier: Modifier = Modifier,
     onToggleBookmark: (String) -> Unit,
-    onHeadlineSelect: (TopHeadline) -> Unit
+    onHeadlineSelect: (Article) -> Unit
 ) {
     val listState = rememberLazyListState()
     LazyColumn(modifier = modifier, state = listState) {
@@ -91,7 +89,9 @@ fun NewsList(
                     onHeadlineSelect = onHeadlineSelect
                 )
                 Divider()
+                return@itemsIndexed
             }
+
             NewsItem(
                 headline = items ?: return@itemsIndexed,
                 onToggleBookmark = onToggleBookmark,
@@ -116,9 +116,9 @@ fun NewsList(
 
 @Composable
 fun NewsItem(
-    headline: TopHeadline,
+    headline: Article,
     onToggleBookmark: (String) -> Unit,
-    onHeadlineSelect: (TopHeadline) -> Unit
+    onHeadlineSelect: (Article) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -146,7 +146,7 @@ fun NewsItem(
 }
 
 @Composable
-fun NewsContent(headline: TopHeadline, modifier: Modifier = Modifier) {
+fun NewsContent(headline: Article, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = headline.title,
@@ -186,7 +186,7 @@ fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun BannerNewsItem(headline: TopHeadline, onHeadlineSelect: (TopHeadline) -> Unit) {
+fun BannerNewsItem(headline: Article, onHeadlineSelect: (Article) -> Unit) {
     Column(modifier = Modifier.clickable { onHeadlineSelect(headline) }) {
         RemoteImage(
             url = headline.imageUrl,
@@ -218,7 +218,7 @@ fun BannerNewsItem(headline: TopHeadline, onHeadlineSelect: (TopHeadline) -> Uni
 @Composable
 fun NewsItemPreview() {
     NewsItem(
-        TopHeadline(
+        Article(
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
             "2021-09-23T05:55:54Z",
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
@@ -236,7 +236,7 @@ fun NewsItemPreview() {
 @Composable
 fun NewsItemBookmarkedPreview() {
     NewsItem(
-        TopHeadline(
+        Article(
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
             "2021-09-23T05:55:54Z",
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
@@ -255,7 +255,7 @@ fun NewsItemBookmarkedPreview() {
 @Composable
 fun NewsItemBookmarkedDarkPreview() {
     NewsItem(
-        TopHeadline(
+        Article(
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
             "2021-09-23T05:55:54Z",
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
@@ -274,7 +274,7 @@ fun NewsItemBookmarkedDarkPreview() {
 @Composable
 fun BannerItemCardPreview() {
     BannerNewsItem(
-        headline = TopHeadline(
+        headline = Article(
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
             "2021-09-23T05:55:54Z",
             "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",

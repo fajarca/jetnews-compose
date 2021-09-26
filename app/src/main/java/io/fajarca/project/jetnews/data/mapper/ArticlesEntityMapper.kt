@@ -1,15 +1,15 @@
 package io.fajarca.project.jetnews.data.mapper
 
-import io.fajarca.project.jetnews.data.db.TopHeadlineEntity
-import io.fajarca.project.jetnews.data.response.TopHeadlinesDto
-import io.fajarca.project.jetnews.domain.entity.TopHeadline
+import io.fajarca.project.jetnews.data.db.ArticleEntity
+import io.fajarca.project.jetnews.data.response.ArticlesDto
+import io.fajarca.project.jetnews.domain.entity.Article
 import javax.inject.Inject
 
-class TopHeadlinesEntityMapper @Inject constructor() {
+class ArticlesEntityMapper @Inject constructor() {
 
-    fun toEntity(input: TopHeadlinesDto): List<TopHeadlineEntity> {
+    fun toEntity(input: ArticlesDto): List<ArticleEntity> {
         return input.articles.map {
-            TopHeadlineEntity(
+            ArticleEntity(
                 title = it.title.orEmpty(),
                 description = it.description.orEmpty(),
                 url = it.url.orEmpty(),
@@ -21,8 +21,8 @@ class TopHeadlinesEntityMapper @Inject constructor() {
         }
     }
 
-    fun fromEntity(input: TopHeadlineEntity): TopHeadline {
-        return TopHeadline(
+    fun fromEntity(input: ArticleEntity): Article {
+        return Article(
             title = input.title,
             description = input.description,
             url = input.url,

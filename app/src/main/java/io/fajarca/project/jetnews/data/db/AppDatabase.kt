@@ -6,11 +6,13 @@ import androidx.room.TypeConverters
 
 @Database(
     entities = [
-        TopHeadlineEntity::class
+        ArticleEntity::class,
+        SearchHistoryEntity::class
     ],
     version = 1
 )
 @TypeConverters(DatabaseTypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun topHeadlineDao(): TopHeadlineDao
+    abstract fun articleDao(): ArticleDao
+    abstract fun searchHistoryDao(): SearchHistoryDao
 }

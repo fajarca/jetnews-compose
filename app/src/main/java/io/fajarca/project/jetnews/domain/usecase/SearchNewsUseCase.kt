@@ -2,7 +2,7 @@ package io.fajarca.project.jetnews.domain.usecase
 
 import androidx.paging.PagingData
 import androidx.paging.map
-import io.fajarca.project.jetnews.domain.entity.TopHeadline
+import io.fajarca.project.jetnews.domain.entity.Article
 import io.fajarca.project.jetnews.domain.repository.NewsRepository
 import io.fajarca.project.jetnews.util.constant.DateTimeFormat
 import io.fajarca.project.jetnews.util.extension.getDifferenceInHours
@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 
 class SearchNewsUseCase @Inject constructor(private val repository: NewsRepository) {
 
-    fun execute(query : String, language : String): Flow<PagingData<TopHeadline>> {
+    fun execute(query : String, language : String): Flow<PagingData<Article>> {
         return repository.searchNews(query, language)
             .map { pagingData ->
                 pagingData.map { headline ->
@@ -22,7 +22,7 @@ class SearchNewsUseCase @Inject constructor(private val repository: NewsReposito
             }
     }
 
-    private fun formatPublishedAt(headline: TopHeadline): TopHeadline {
+    private fun formatPublishedAt(headline: Article): Article {
         return headline.copy(
             publishedAt = "${
                 headline.publishedAt.toDate(DateTimeFormat.FULL).getDifferenceInHours()

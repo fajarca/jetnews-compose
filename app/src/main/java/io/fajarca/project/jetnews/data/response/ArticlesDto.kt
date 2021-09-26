@@ -2,7 +2,7 @@ package io.fajarca.project.jetnews.data.response
 
 import com.squareup.moshi.Json
 
-data class TopHeadlinesDto(
+data class ArticlesDto(
     @field:Json(name = "articles")
     val articles: List<Article> = emptyList()
 ) {

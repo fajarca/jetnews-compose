@@ -1,16 +1,17 @@
 package io.fajarca.project.jetnews.data.source
 
 import androidx.paging.PagingSource
-import io.fajarca.project.jetnews.data.db.TopHeadlineDao
-import io.fajarca.project.jetnews.data.db.TopHeadlineEntity
+import io.fajarca.project.jetnews.data.db.ArticleDao
+import io.fajarca.project.jetnews.data.db.ArticleEntity
+import io.fajarca.project.jetnews.data.db.SearchHistoryDao
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 class NewsLocalDataSource @Inject constructor(
-    private val dao: TopHeadlineDao
+    private val dao: ArticleDao
 ) {
 
-    fun findAll(): PagingSource<Int, TopHeadlineEntity> {
+    fun findAll(): PagingSource<Int, ArticleEntity> {
         return dao.findAll()
     }
 
@@ -18,7 +19,7 @@ class NewsLocalDataSource @Inject constructor(
         return dao.findAllNewsSource()
     }
 
-    suspend fun toggleFavorite(title : String): Int {
-        return dao.toggleFavorite(title)
+    suspend fun toggleBookmark(title : String): Int {
+        return dao.toggleBookmark(title)
     }
 }

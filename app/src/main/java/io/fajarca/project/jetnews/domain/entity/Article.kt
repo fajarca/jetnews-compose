@@ -1,6 +1,6 @@
 package io.fajarca.project.jetnews.domain.entity
 
-data class TopHeadline(
+data class Article(
     val description: String,
     val publishedAt: String,
     val title: String,

@@ -5,28 +5,28 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import io.fajarca.project.jetnews.data.mapper.TopHeadlinesEntityMapper
-import io.fajarca.project.jetnews.data.mapper.TopHeadlinesMapper
+import io.fajarca.project.jetnews.data.mapper.ArticlesEntityMapper
+import io.fajarca.project.jetnews.data.mapper.ArticlesMapper
 import io.fajarca.project.jetnews.data.source.NewsLocalDataSource
 import io.fajarca.project.jetnews.data.source.NewsRemoteDataSource
 import io.fajarca.project.jetnews.data.source.paging.NewsPagingRemoteDataSource
 import io.fajarca.project.jetnews.data.source.paging.NewsPagingRemoteMediator
-import io.fajarca.project.jetnews.domain.entity.TopHeadline
+import io.fajarca.project.jetnews.domain.entity.Article
 import io.fajarca.project.jetnews.domain.repository.NewsRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class NewsRepositoryImpl @Inject constructor(
-    private val entityMapper: TopHeadlinesEntityMapper,
-    private val mapper: TopHeadlinesMapper,
+    private val entityMapper: ArticlesEntityMapper,
+    private val mapper: ArticlesMapper,
     private val localDataSource: NewsLocalDataSource,
     private val remoteDataSource: NewsRemoteDataSource,
     private val pagingRemoteMediator: NewsPagingRemoteMediator,
 ) : NewsRepository {
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun getTopHeadlines(): Flow<PagingData<TopHeadline>> {
+    override fun getTopHeadlines(): Flow<PagingData<Article>> {
         return Pager(
             config = PagingConfig(pageSize = 5, initialLoadSize = 3 * 5),
             remoteMediator = pagingRemoteMediator
@@ -44,11 +44,11 @@ class NewsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun toggleBookmark(title: String): Int {
-        return localDataSource.toggleFavorite(title)
+        return localDataSource.toggleBookmark(title)
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun searchNews(query: String, language: String): Flow<PagingData<TopHeadline>> {
+    override fun searchNews(query: String, language: String): Flow<PagingData<Article>> {
         return Pager(PagingConfig(pageSize = 10, initialLoadSize = 2 * 10)) {
             NewsPagingRemoteDataSource { page, pageSize ->
                 remoteDataSource.search(query, language, page, pageSize)
