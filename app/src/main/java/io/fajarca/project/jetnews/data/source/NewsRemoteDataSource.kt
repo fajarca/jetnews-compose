@@ -15,5 +15,8 @@ class NewsRemoteDataSource @Inject constructor(
         return apiClient.call { newsService.getTopHeadlines(country, page, size) }
     }
 
+    suspend fun search(query : String, language : String, page : Int, size : Int): Either<Exception, TopHeadlinesDto> {
+        return apiClient.call { newsService.search(query, language, page, size) }
+    }
 
 }

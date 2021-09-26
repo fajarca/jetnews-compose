@@ -2,11 +2,7 @@ package io.fajarca.project.jetnews.presentation.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.fajarca.project.jetnews.data.db.TopHeadlineDao
-import io.fajarca.project.jetnews.data.source.NewsRemoteMediator
 import io.fajarca.project.jetnews.domain.usecase.GetNewsSourceUseCase
 import io.fajarca.project.jetnews.domain.usecase.GetTopHeadlinesUseCase
 import io.fajarca.project.jetnews.domain.usecase.ToggleBookmarkUseCase

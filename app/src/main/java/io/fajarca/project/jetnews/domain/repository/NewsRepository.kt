@@ -8,4 +8,5 @@ interface NewsRepository {
     fun getTopHeadlines(): Flow<PagingData<TopHeadline>>
     suspend fun getNewsSource(): Flow<List<String>>
     suspend fun toggleBookmark(title: String): Int
+    fun searchNews(query: String, language: String): Flow<PagingData<TopHeadline>>
 }

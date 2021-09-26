@@ -45,6 +45,7 @@ import androidx.paging.compose.items
 import androidx.paging.compose.itemsIndexed
 import io.fajarca.project.jetnews.domain.entity.TopHeadline
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
+import io.fajarca.project.jetnews.presentation.search.SearchNewsActivity
 import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
 import io.fajarca.project.jetnews.ui.components.RemoteImage
 
@@ -53,8 +54,8 @@ fun MainScreen(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AppBar(onSearchClicked = { viewModel.getNewsSource() })
         val context = LocalContext.current
+        AppBar(onSearchClicked = { SearchNewsActivity.start(context) })
         NewsList(
             topHeadlines = uiState.headlines.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),

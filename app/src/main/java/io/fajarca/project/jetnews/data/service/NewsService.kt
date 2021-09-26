@@ -11,4 +11,12 @@ interface NewsService {
         @Query("page") page: Int,
         @Query("pageSize") size: Int
     ): TopHeadlinesDto
+
+    @GET("everything")
+    suspend fun search(
+        @Query("q") query: String,
+        @Query("language") language: String = "en",
+        @Query("page") page: Int,
+        @Query("pageSize") size: Int
+    ): TopHeadlinesDto
 }

@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews.data.source
+package io.fajarca.project.jetnews.data.source.paging
 
 import android.database.sqlite.SQLiteConstraintException
 import androidx.paging.ExperimentalPagingApi
@@ -9,13 +9,14 @@ import androidx.room.withTransaction
 import io.fajarca.project.jetnews.data.db.AppDatabase
 import io.fajarca.project.jetnews.data.db.TopHeadlineEntity
 import io.fajarca.project.jetnews.data.mapper.TopHeadlinesEntityMapper
+import io.fajarca.project.jetnews.data.source.NewsRemoteDataSource
 import io.fajarca.project.jetnews.util.extension.getOrNull
 import javax.inject.Inject
 import okio.IOException
 import retrofit2.HttpException
 
 @OptIn(ExperimentalPagingApi::class)
-class NewsRemoteMediator @Inject constructor(
+class NewsPagingRemoteMediator @Inject constructor(
     private val entityMapper: TopHeadlinesEntityMapper,
     private val database: AppDatabase,
     private val remoteDataSource: NewsRemoteDataSource
