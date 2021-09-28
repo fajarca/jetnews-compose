@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
@@ -36,7 +35,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -46,6 +47,7 @@ import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.search.SearchNewsActivity
 import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
 import io.fajarca.project.jetnews.ui.components.RemoteImage
+import io.fajarca.project.jetnews.util.preview.ArticleProvider
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
@@ -55,10 +57,10 @@ fun MainScreen(viewModel: MainViewModel) {
         val context = LocalContext.current
         AppBar(onSearchClicked = { SearchNewsActivity.start(context) })
         NewsList(
-            articles = uiState.headlines.collectAsLazyPagingItems(),
+            articles = uiState.articles.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),
             onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
-            onHeadlineSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
+            onArticleSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
         )
     }
 }
@@ -77,15 +79,15 @@ fun NewsList(
     articles: LazyPagingItems<Article>,
     modifier: Modifier = Modifier,
     onToggleBookmark: (String) -> Unit,
-    onHeadlineSelect: (Article) -> Unit
+    onArticleSelect: (Article) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
 
         itemsIndexed(lazyPagingItems = articles) { index, items ->
             if (index == 0) {
                 BannerNewsItem(
-                    headline = items ?: return@itemsIndexed,
-                    onHeadlineSelect = onHeadlineSelect
+                    article = items ?: return@itemsIndexed,
+                    onArticleSelect = onArticleSelect
                 )
                 Divider()
                 return@itemsIndexed
@@ -94,7 +96,7 @@ fun NewsList(
             NewsItem(
                 headline = items ?: return@itemsIndexed,
                 onToggleBookmark = onToggleBookmark,
-                onHeadlineSelect = onHeadlineSelect
+                onSelectArticle = onArticleSelect
             )
             Divider()
         }
@@ -117,12 +119,12 @@ fun NewsList(
 fun NewsItem(
     headline: Article,
     onToggleBookmark: (String) -> Unit,
-    onHeadlineSelect: (Article) -> Unit
+    onSelectArticle: (Article) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onHeadlineSelect(headline) }
+            .clickable { onSelectArticle(headline) }
             .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -135,7 +137,7 @@ fun NewsItem(
             contentScale = ContentScale.FillHeight
         )
 
-        NewsContent(headline = headline, Modifier.weight(1f))
+        NewsContent(article = headline, Modifier.weight(1f))
 
         BookmarkButton(
             isBookmarked = headline.isBookmarked,
@@ -145,10 +147,10 @@ fun NewsItem(
 }
 
 @Composable
-fun NewsContent(headline: Article, modifier: Modifier = Modifier) {
+fun NewsContent(article: Article, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
-            text = headline.title,
+            text = article.title,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.subtitle1
@@ -156,14 +158,14 @@ fun NewsContent(headline: Article, modifier: Modifier = Modifier) {
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
-                text = headline.source,
+                text = article.source,
                 style = MaterialTheme.typography.body2
             )
         }
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
-                text = headline.publishedAt,
+                text = article.publishedAt,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -185,16 +187,16 @@ fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun BannerNewsItem(headline: Article, onHeadlineSelect: (Article) -> Unit) {
-    Column(modifier = Modifier.clickable { onHeadlineSelect(headline) }) {
+fun BannerNewsItem(article: Article, onArticleSelect: (Article) -> Unit) {
+    Column(modifier = Modifier.clickable { onArticleSelect(article) }) {
         RemoteImage(
-            url = headline.imageUrl,
+            url = article.imageUrl,
             modifier = Modifier.height(220.dp),
             contentScale = ContentScale.FillBounds
         )
 
         Text(
-            text = headline.title,
+            text = article.title,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             style = MaterialTheme.typography.subtitle1,
@@ -203,7 +205,7 @@ fun BannerNewsItem(headline: Article, onHeadlineSelect: (Article) -> Unit) {
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
-                text = headline.description,
+                text = article.description,
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
             )
@@ -212,76 +214,35 @@ fun BannerNewsItem(headline: Article, onHeadlineSelect: (Article) -> Unit) {
 
 }
 
-
-@Preview("Headline news (bookmarked)")
+@Preview("Article news (bookmarked)")
 @Composable
-fun NewsItemPreview() {
-    NewsItem(
-        Article(
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
-            "2021-09-23T05:55:54Z",
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
-            "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
-            "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
-            "Kontan.co.id",
-            true,
-        ),
-        {},
-        {}
-    )
-}
-
-@Preview("Headline news")
-@Composable
-fun NewsItemBookmarkedPreview() {
-    NewsItem(
-        Article(
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
-            "2021-09-23T05:55:54Z",
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
-            "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
-            "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
-            "Kontan.co.id",
-            false,
-        ),
-        {},
-        {}
-    )
+fun MainScreenPreview() {
+    MainScreen(hiltViewModel())
 }
 
 
-@Preview("Headline news (dark)", uiMode = UI_MODE_NIGHT_YES)
+@Preview("Article news (bookmarked)")
 @Composable
-fun NewsItemBookmarkedDarkPreview() {
-    NewsItem(
-        Article(
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
-            "2021-09-23T05:55:54Z",
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
-            "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
-            "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
-            "Kontan.co.id",
-            false,
-        ),
-        {},
-        {}
-    )
+fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+    NewsItem(article, {}, {})
+}
+
+@Preview("Article news")
+@Composable
+fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+    NewsItem(article, {}, {})
+}
+
+
+@Preview("Article news (dark)", uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun NewsItemBookmarkedDarkPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+    NewsItem(article, {}, {})
 }
 
 
 @Preview("Banner Item Card")
 @Composable
-fun BannerItemCardPreview() {
-    BannerNewsItem(
-        headline = Article(
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa",
-            "2021-09-23T05:55:54Z",
-            "Duh! Bug iOS 15 menganggap ruang penyimpanan penuh meskipun masih ada sisa - Kontan",
-            "https://lifestyle.kontan.co.id/news/duh-bug-ios-15-menganggap-ruang-penyimpanan-penuh-meskipun-masih-ada-sisa",
-            "https://foto.kontan.co.id/H3LwljVMcQdeUbi8U_XTzM-v8T0=/smart/2020/10/14/963412751p.jpg",
-            "Kontan.co.id",
-            false,
-        ),
-        {}
-    )
+fun BannerItemCardPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+    BannerNewsItem(article, {})
 }

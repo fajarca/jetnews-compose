@@ -4,14 +4,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.hilt.navigation.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.fajarca.project.jetnews.ui.theme.JetNewsTheme
 
 @AndroidEntryPoint
 class SearchNewsActivity : AppCompatActivity() {
-    private val viewModel: SearchNewsViewModel by viewModels()
 
     companion object {
         @JvmStatic
@@ -25,7 +24,7 @@ class SearchNewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             JetNewsTheme {
-                SearchNewsScreen(viewModel, onNavigationIconClick = { finish() })
+                SearchNewsScreen(hiltViewModel(), onNavigationIconClick = { finish() })
             }
         }
     }

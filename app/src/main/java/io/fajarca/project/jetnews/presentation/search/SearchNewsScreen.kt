@@ -44,11 +44,15 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
+import io.fajarca.project.jetnews.domain.entity.Article
 import io.fajarca.project.jetnews.domain.entity.SearchHistory
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.list.NewsList
+import io.fajarca.project.jetnews.util.preview.ArticleProvider
+import io.fajarca.project.jetnews.util.preview.SearchHistoryProvider
 import java.util.*
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -103,7 +107,7 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
             articles = uiState.searchResult.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),
             onToggleBookmark = {},
-            onHeadlineSelect = { headline ->
+            onArticleSelect = { headline ->
                 NewsDetailActivity.start(
                     context,
                     headline.url
@@ -207,8 +211,8 @@ fun Chip(history: SearchHistory, onChipSelect: (SearchHistory) -> Unit) {
 
 @Preview(showBackground = true)
 @Composable
-fun ChipPreview() {
-    Chip(SearchHistory(1, "Aston Martin", Date()), {})
+fun ChipPreview(@PreviewParameter(SearchHistoryProvider::class) history: SearchHistory) {
+    Chip(history, {})
 }
 
 
@@ -235,15 +239,12 @@ fun AppBarWithSearchViewPreview() {
             }
         },
         actions = {
-
             SearchTextField(
                 "Aston Martin",
                 onTextChange = {},
                 onSearchClick = {},
                 onClearQuery = {}
             )
-
-
         }
     )
 }

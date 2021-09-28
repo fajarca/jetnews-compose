@@ -23,15 +23,15 @@ class MainViewModel @Inject constructor(
     private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(MovieUiState(isLoading = true))
-    val uiState: StateFlow<MovieUiState> = _uiState
+    private val _uiState = MutableStateFlow(ArticleUiState(isLoading = true))
+    val uiState: StateFlow<ArticleUiState> = _uiState
 
     init {
         getPosts()
     }
 
     private fun getPosts() {
-        _uiState.update { uiState -> uiState.copy(headlines = getTopHeadlinesUseCase.execute()) }
+        _uiState.update { uiState -> uiState.copy(articles = getTopHeadlinesUseCase.execute()) }
     }
 
     fun getNewsSource() {
