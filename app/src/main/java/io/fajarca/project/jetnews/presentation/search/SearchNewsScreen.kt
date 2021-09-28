@@ -1,6 +1,5 @@
 package io.fajarca.project.jetnews.presentation.search
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,11 +33,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -50,6 +51,7 @@ import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.list.NewsList
 import java.util.*
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
@@ -67,7 +69,8 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
                 SearchTextField(
                     uiState.text,
                     onTextChange = { text -> viewModel.onQueryChange(text) },
-                    onSearchClick = { text -> viewModel.searchNews(text, "en") }
+                    onSearchClick = { text -> viewModel.searchNews(text, "en") },
+                    onClearQuery = { viewModel.onQueryChange("") }
                 )
             }
         )
@@ -86,9 +89,14 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
             text = "Recent searches",
             modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
         )
+        val keyboardController = LocalSoftwareKeyboardController.current
         SearchHistoryList(
             searchHistories = uiState.searchHistories,
-            onChipSelect = { viewModel.onQueryChange(it.query) }
+            onChipSelect = {
+                viewModel.onQueryChange(it.query)
+                viewModel.searchNews(it.query, "en")
+                keyboardController?.hide()
+            }
         )
 
         NewsList(
@@ -105,10 +113,17 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun SearchTextField(text: String, onTextChange: (String) -> Unit, onSearchClick: (String) -> Unit) {
+fun SearchTextField(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onClearQuery: () -> Unit
+) {
     val focusRequester = remember { FocusRequester() }
     val textFieldValue = TextFieldValue(text = text, selection = TextRange(text.length))
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     TextField(
         modifier = Modifier
@@ -117,13 +132,18 @@ fun SearchTextField(text: String, onTextChange: (String) -> Unit, onSearchClick:
         value = textFieldValue,
         onValueChange = { newText -> onTextChange(newText.text) },
         shape = RoundedCornerShape(8.dp),
-        keyboardActions = KeyboardActions { onSearchClick(text) },
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                onSearchClick(text)
+                keyboardController?.hide()
+            }
+        ),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         singleLine = true,
         label = { Text(text = "Search..", color = MaterialTheme.colors.onPrimary) },
         trailingIcon = {
             if (text.isNotEmpty()) {
-                IconButton(onClick = { onTextChange("") }) {
+                IconButton(onClick = onClearQuery) {
                     Icon(
                         Icons.Default.Close,
                         contentDescription = "",
@@ -188,7 +208,7 @@ fun Chip(history: SearchHistory, onChipSelect: (SearchHistory) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun ChipPreview() {
-    Chip(SearchHistory(1, "Tokopedia", Date()), {})
+    Chip(SearchHistory(1, "Aston Martin", Date()), {})
 }
 
 
@@ -197,8 +217,9 @@ fun ChipPreview() {
 fun SearchViewPreview() {
     SearchTextField(
         "Aston Martin",
-        onTextChange = { text -> },
-        onSearchClick = { text -> }
+        onTextChange = {},
+        onSearchClick = {},
+        onClearQuery = {}
     )
 }
 
@@ -217,8 +238,9 @@ fun AppBarWithSearchViewPreview() {
 
             SearchTextField(
                 "Aston Martin",
-                onTextChange = { text -> },
-                onSearchClick = { text -> }
+                onTextChange = {},
+                onSearchClick = {},
+                onClearQuery = {}
             )
 
 
