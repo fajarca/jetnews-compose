@@ -55,7 +55,7 @@ fun MainScreen(viewModel: MainViewModel) {
         val context = LocalContext.current
         AppBar(onSearchClicked = { SearchNewsActivity.start(context) })
         NewsList(
-            topHeadlines = uiState.headlines.collectAsLazyPagingItems(),
+            articles = uiState.headlines.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),
             onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
             onHeadlineSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
@@ -74,15 +74,14 @@ fun AppBar(onSearchClicked: () -> Unit) {
 
 @Composable
 fun NewsList(
-    topHeadlines: LazyPagingItems<Article>,
+    articles: LazyPagingItems<Article>,
     modifier: Modifier = Modifier,
     onToggleBookmark: (String) -> Unit,
     onHeadlineSelect: (Article) -> Unit
 ) {
-    val listState = rememberLazyListState()
-    LazyColumn(modifier = modifier, state = listState) {
+    LazyColumn(modifier = modifier) {
 
-        itemsIndexed(lazyPagingItems = topHeadlines) { index, items ->
+        itemsIndexed(lazyPagingItems = articles) { index, items ->
             if (index == 0) {
                 BannerNewsItem(
                     headline = items ?: return@itemsIndexed,
@@ -100,7 +99,7 @@ fun NewsList(
             Divider()
         }
 
-        topHeadlines.apply {
+        articles.apply {
             when {
                 loadState.refresh is LoadState.Loading -> {
                     item { CenteredCircularProgressIndicator() }

@@ -5,12 +5,16 @@ import androidx.paging.PagingState
 import io.fajarca.project.jetnews.data.response.ArticlesDto
 import io.fajarca.project.jetnews.domain.Either
 import io.fajarca.project.jetnews.util.extension.getOrNull
+import java.io.IOException
 import javax.inject.Inject
 
 class NewsPagingRemoteDataSource @Inject constructor(
     private val apiCall : suspend (Int, Int) -> Either<Exception, ArticlesDto>
 ) : PagingSource<Int, ArticlesDto.Article>() {
 
+
+    override val keyReuseSupported: Boolean
+        get() = true
 
     override fun getRefreshKey(state: PagingState<Int, ArticlesDto.Article>): Int? {
         // Try to find the page key of the closest page to anchorPosition, from
@@ -36,10 +40,10 @@ class NewsPagingRemoteDataSource @Inject constructor(
 
             if (response is Either.Right) {
                 nextPage++
+                LoadResult.Page(articles, null, nextPage)
+            } else {
+                LoadResult.Error(IOException())
             }
-
-            LoadResult.Page(articles, null, nextPage)
-
         } catch (e: Exception) {
             LoadResult.Error(e)
         }
