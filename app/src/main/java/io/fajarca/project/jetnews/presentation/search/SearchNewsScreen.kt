@@ -1,6 +1,8 @@
 package io.fajarca.project.jetnews.presentation.search
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
@@ -37,7 +39,9 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -78,8 +82,14 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
         }
 
         val context = LocalContext.current
-        Text(text = "Recent searches", modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp))
-        SearchHistoryList(uiState.searchHistories)
+        Text(
+            text = "Recent searches",
+            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+        )
+        SearchHistoryList(
+            searchHistories = uiState.searchHistories,
+            onChipSelect = { viewModel.onQueryChange(it.query) }
+        )
 
         NewsList(
             articles = uiState.searchResult.collectAsLazyPagingItems(),
@@ -98,10 +108,14 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
 @Composable
 fun SearchTextField(text: String, onTextChange: (String) -> Unit, onSearchClick: (String) -> Unit) {
     val focusRequester = remember { FocusRequester() }
+    val textFieldValue = TextFieldValue(text = text, selection = TextRange(text.length))
+
     TextField(
-        modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
-        value = text,
-        onValueChange = { newText -> onTextChange(newText) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .focusRequester(focusRequester),
+        value = textFieldValue,
+        onValueChange = { newText -> onTextChange(newText.text) },
         shape = RoundedCornerShape(8.dp),
         keyboardActions = KeyboardActions { onSearchClick(text) },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -139,19 +153,19 @@ fun SearchTextField(text: String, onTextChange: (String) -> Unit, onSearchClick:
 }
 
 @Composable
-fun SearchHistoryList(searchHistories: List<SearchHistory>) {
+fun SearchHistoryList(searchHistories: List<SearchHistory>, onChipSelect: (SearchHistory) -> Unit) {
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(16.dp)
     ) {
         items(searchHistories) {
-            Chip(history = it)
+            Chip(history = it, onChipSelect = onChipSelect)
         }
     }
 }
 
 @Composable
-fun Chip(history: SearchHistory) {
+fun Chip(history: SearchHistory, onChipSelect: (SearchHistory) -> Unit) {
     Surface(
         modifier = Modifier.padding(end = 8.dp, bottom = 8.dp),
         elevation = 8.dp,
@@ -163,6 +177,7 @@ fun Chip(history: SearchHistory) {
         content = {
             Text(
                 text = history.query, modifier = Modifier
+                    .clickable { onChipSelect(history) }
                     .padding(8.dp)
                     .defaultMinSize(24.dp, 24.dp)
             )
@@ -173,7 +188,7 @@ fun Chip(history: SearchHistory) {
 @Preview(showBackground = true)
 @Composable
 fun ChipPreview() {
-    Chip(SearchHistory(1, "Tokopedia", Date()))
+    Chip(SearchHistory(1, "Tokopedia", Date()), {})
 }
 
 
