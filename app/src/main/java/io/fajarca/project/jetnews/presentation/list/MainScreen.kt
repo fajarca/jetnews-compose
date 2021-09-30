@@ -42,11 +42,11 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
-import io.fajarca.project.jetnews.domain.entity.Article
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.search.SearchNewsActivity
 import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
 import io.fajarca.project.jetnews.ui.components.RemoteImage
+import io.fajarca.project.jetnews.util.date.TimeDifference
 import io.fajarca.project.jetnews.util.preview.ArticleProvider
 
 @Composable
@@ -76,10 +76,10 @@ fun AppBar(onSearchClicked: () -> Unit) {
 
 @Composable
 fun NewsList(
-    articles: LazyPagingItems<Article>,
+    articles: LazyPagingItems<ArticleUiModel>,
     modifier: Modifier = Modifier,
     onToggleBookmark: (String) -> Unit,
-    onArticleSelect: (Article) -> Unit
+    onArticleSelect: (ArticleUiModel) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
 
@@ -117,9 +117,9 @@ fun NewsList(
 
 @Composable
 fun NewsItem(
-    headline: Article,
+    headline: ArticleUiModel,
     onToggleBookmark: (String) -> Unit,
-    onSelectArticle: (Article) -> Unit
+    onSelectArticle: (ArticleUiModel) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -147,7 +147,7 @@ fun NewsItem(
 }
 
 @Composable
-fun NewsContent(article: Article, modifier: Modifier = Modifier) {
+fun NewsContent(article: ArticleUiModel, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = article.title,
@@ -165,7 +165,12 @@ fun NewsContent(article: Article, modifier: Modifier = Modifier) {
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
-                text = article.publishedAt,
+                text = when(article.timeDifference) {
+                    is TimeDifference.Day -> "${article.timeDifference.days} hari yang lalu"
+                    is TimeDifference.Hours -> "${article.timeDifference.hours} jam yang lalu"
+                    is TimeDifference.Minute -> "${article.timeDifference.minutes} menit yang lalu"
+                    TimeDifference.Unknown -> "-"
+                },
                 style = MaterialTheme.typography.body2,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -187,7 +192,7 @@ fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun BannerNewsItem(article: Article, onArticleSelect: (Article) -> Unit) {
+fun BannerNewsItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel) -> Unit) {
     Column(modifier = Modifier.clickable { onArticleSelect(article) }) {
         RemoteImage(
             url = article.imageUrl,
@@ -214,35 +219,35 @@ fun BannerNewsItem(article: Article, onArticleSelect: (Article) -> Unit) {
 
 }
 
-@Preview("Article news (bookmarked)")
+@Preview("ArticleUiModel news (bookmarked)")
 @Composable
 fun MainScreenPreview() {
     MainScreen(hiltViewModel())
 }
 
 
-@Preview("Article news (bookmarked)")
+@Preview("ArticleUiModel news (bookmarked)")
 @Composable
-fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
     NewsItem(article, {}, {})
 }
 
-@Preview("Article news")
+@Preview("ArticleUiModel news")
 @Composable
-fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
     NewsItem(article, {}, {})
 }
 
 
-@Preview("Article news (dark)", uiMode = UI_MODE_NIGHT_YES)
+@Preview("ArticleUiModel news (dark)", uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun NewsItemBookmarkedDarkPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+fun NewsItemBookmarkedDarkPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
     NewsItem(article, {}, {})
 }
 
 
 @Preview("Banner Item Card")
 @Composable
-fun BannerItemCardPreview(@PreviewParameter(ArticleProvider::class) article : Article) {
+fun BannerItemCardPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
     BannerNewsItem(article, {})
 }

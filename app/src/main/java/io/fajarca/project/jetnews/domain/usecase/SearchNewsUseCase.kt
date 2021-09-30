@@ -4,16 +4,22 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import io.fajarca.project.jetnews.domain.entity.Article
 import io.fajarca.project.jetnews.domain.repository.NewsRepository
+import io.fajarca.project.jetnews.presentation.list.ArticleUiModel
 import io.fajarca.project.jetnews.util.constant.DateTimeFormat
+import io.fajarca.project.jetnews.util.date.DateManager
 import io.fajarca.project.jetnews.util.extension.getDifferenceInHours
 import io.fajarca.project.jetnews.util.extension.toDate
+import java.util.*
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class SearchNewsUseCase @Inject constructor(private val repository: NewsRepository) {
+class SearchNewsUseCase @Inject constructor(
+    private val repository: NewsRepository,
+    private val dateManager: DateManager
+) {
 
-    fun execute(query : String, language : String): Flow<PagingData<Article>> {
+    fun execute(query: String, language: String): Flow<PagingData<ArticleUiModel>> {
         return repository.searchNews(query, language)
             .map { pagingData ->
                 pagingData.map { headline ->
@@ -22,11 +28,20 @@ class SearchNewsUseCase @Inject constructor(private val repository: NewsReposito
             }
     }
 
-    private fun formatPublishedAt(headline: Article): Article {
-        return headline.copy(
-            publishedAt = "${
-                headline.publishedAt.toDate(DateTimeFormat.FULL).getDifferenceInHours()
-            } jam yang lalu"
+    private fun formatPublishedAt(article: Article): ArticleUiModel {
+
+        val timeDifference =
+            dateManager.getTimeDifference(Date(), article.publishedAt.toDate(DateTimeFormat.FULL))
+
+        return ArticleUiModel(
+            article.description,
+            article.title,
+            article.url,
+            article.imageUrl,
+            article.source,
+            article.isBookmarked,
+            timeDifference
         )
+
     }
 }

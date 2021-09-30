@@ -9,6 +9,7 @@ import io.fajarca.project.jetnews.domain.entity.SearchHistory
 import io.fajarca.project.jetnews.domain.usecase.GetSearchHistoryUseCase
 import io.fajarca.project.jetnews.domain.usecase.InsertSearchHistoryUseCase
 import io.fajarca.project.jetnews.domain.usecase.SearchNewsUseCase
+import io.fajarca.project.jetnews.presentation.list.ArticleUiModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,7 +22,7 @@ import kotlinx.coroutines.launch
 data class SearchUiModel(
     val isLoading: Boolean = false,
     val text: String = "",
-    val searchResult: Flow<PagingData<Article>> = flowOf(),
+    val searchResult: Flow<PagingData<ArticleUiModel>> = flowOf(),
     val searchHistories : List<SearchHistory> = emptyList()
 )
 
