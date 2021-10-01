@@ -7,11 +7,11 @@ import javax.inject.Inject
 class SearchHistoryEntityMapper @Inject constructor() {
 
     fun toEntity(input: SearchHistory): SearchHistoryEntity {
-        return SearchHistoryEntity(query = input.query, createdAt = input.createdAt)
+        return SearchHistoryEntity(input.query, input.createdAt)
     }
 
     fun fromEntity(input: List<SearchHistoryEntity>): List<SearchHistory> {
-        return input.map { SearchHistory(it.id, it.query, it.createdAt) }
+        return input.map { SearchHistory(it.query, it.createdAt) }
     }
 
 }

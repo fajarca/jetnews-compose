@@ -17,4 +17,7 @@ class SearchHistoryLocalDataSource @Inject constructor(
          dao.insert(entity)
     }
 
+    suspend fun deleteAll() {
+        dao.deleteAll()
+    }
 }

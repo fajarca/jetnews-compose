@@ -16,7 +16,7 @@ class DateManager @Inject constructor() {
         val timeDifferenceInHours = TimeUnit.MILLISECONDS.toHours(differenceInMillis)
 
         return when {
-            timeDifferenceInHours <= ONE_HOUR -> {
+            timeDifferenceInHours < ONE_HOUR -> {
                 val timeDifferenceInMinutes = TimeUnit.MILLISECONDS.toMinutes(differenceInMillis)
                 TimeDifference.Minute(timeDifferenceInMinutes.toInt())
             }

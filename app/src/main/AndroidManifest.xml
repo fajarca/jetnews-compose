@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.JetNews.NoActionBar">
         <activity
+            android:name=".presentation.search_result.SearchResultActivity"
+            android:exported="true"
+            android:label="@string/title_activity_search_result"
+            android:theme="@style/Theme.JetNews.NoActionBar.NoActionBar" />
+        <activity
             android:name=".presentation.search.SearchNewsActivity"
             android:exported="true" />
         <activity

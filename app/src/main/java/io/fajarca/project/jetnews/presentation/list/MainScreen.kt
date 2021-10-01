@@ -56,11 +56,11 @@ fun MainScreen(viewModel: MainViewModel) {
     Column(modifier = Modifier.fillMaxSize()) {
         val context = LocalContext.current
         AppBar(onSearchClicked = { SearchNewsActivity.start(context) })
-        NewsList(
+        ArticleList(
             articles = uiState.articles.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),
             onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
-            onArticleSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
+            onArticleSelect = { article -> NewsDetailActivity.start(context, article.url) }
         )
     }
 }
@@ -75,7 +75,7 @@ fun AppBar(onSearchClicked: () -> Unit) {
 }
 
 @Composable
-fun NewsList(
+fun ArticleList(
     articles: LazyPagingItems<ArticleUiModel>,
     modifier: Modifier = Modifier,
     onToggleBookmark: (String) -> Unit,
@@ -93,8 +93,8 @@ fun NewsList(
                 return@itemsIndexed
             }
 
-            NewsItem(
-                headline = items ?: return@itemsIndexed,
+            ArticleItem(
+                article = items ?: return@itemsIndexed,
                 onToggleBookmark = onToggleBookmark,
                 onSelectArticle = onArticleSelect
             )
@@ -116,38 +116,38 @@ fun NewsList(
 }
 
 @Composable
-fun NewsItem(
-    headline: ArticleUiModel,
+fun ArticleItem(
+    article: ArticleUiModel,
     onToggleBookmark: (String) -> Unit,
     onSelectArticle: (ArticleUiModel) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onSelectArticle(headline) }
+            .clickable { onSelectArticle(article) }
             .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
         RemoteImage(
-            url = headline.imageUrl,
+            url = article.imageUrl,
             modifier = Modifier
                 .size(120.dp)
                 .clip(RoundedCornerShape(8.dp)),
             contentScale = ContentScale.FillHeight
         )
 
-        NewsContent(article = headline, Modifier.weight(1f))
+        ArticleContent(article = article, Modifier.weight(1f))
 
         BookmarkButton(
-            isBookmarked = headline.isBookmarked,
-            onClick = { onToggleBookmark(headline.title) })
+            isBookmarked = article.isBookmarked,
+            onClick = { onToggleBookmark(article.title) })
 
     }
 }
 
 @Composable
-fun NewsContent(article: ArticleUiModel, modifier: Modifier = Modifier) {
+fun ArticleContent(article: ArticleUiModel, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = article.title,
@@ -229,20 +229,20 @@ fun MainScreenPreview() {
 @Preview("ArticleUiModel news (bookmarked)")
 @Composable
 fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
-    NewsItem(article, {}, {})
+    ArticleItem(article, {}, {})
 }
 
 @Preview("ArticleUiModel news")
 @Composable
 fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
-    NewsItem(article, {}, {})
+    ArticleItem(article, {}, {})
 }
 
 
 @Preview("ArticleUiModel news (dark)", uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun NewsItemBookmarkedDarkPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
-    NewsItem(article, {}, {})
+    ArticleItem(article, {}, {})
 }
 
 

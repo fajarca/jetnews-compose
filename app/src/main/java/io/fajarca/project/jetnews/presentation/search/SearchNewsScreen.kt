@@ -1,25 +1,21 @@
 package io.fajarca.project.jetnews.presentation.search
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -32,7 +28,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -43,22 +38,20 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.paging.compose.collectAsLazyPagingItems
-import io.fajarca.project.jetnews.domain.entity.Article
 import io.fajarca.project.jetnews.domain.entity.SearchHistory
-import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
-import io.fajarca.project.jetnews.presentation.list.NewsList
-import io.fajarca.project.jetnews.util.preview.ArticleProvider
+import io.fajarca.project.jetnews.presentation.search_result.SearchResultActivity
 import io.fajarca.project.jetnews.util.preview.SearchHistoryProvider
-import java.util.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
+
+    val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
@@ -73,47 +66,54 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
                 SearchTextField(
                     uiState.text,
                     onTextChange = { text -> viewModel.onQueryChange(text) },
-                    onSearchClick = { text -> viewModel.searchNews(text, "en") },
+                    onSearchClick = { text ->
+                        SearchResultActivity.start(context, text)
+                        viewModel.recordSearchHistory(text)
+                    },
                     onClearQuery = { viewModel.onQueryChange("") }
                 )
             }
         )
 
-        if (uiState.isLoading) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                CircularProgressIndicator(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
-        }
-
-        val context = LocalContext.current
-        Text(
-            text = "Recent searches",
-            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
+        RecentSearchSection(
+            histories = uiState.searchHistories,
+            onClearSearchHistory = { viewModel.clearSearchHistory() }
         )
+
+
         val keyboardController = LocalSoftwareKeyboardController.current
         SearchHistoryList(
             searchHistories = uiState.searchHistories,
-            onChipSelect = {
+            onItemSelect = {
                 viewModel.onQueryChange(it.query)
-                viewModel.searchNews(it.query, "en")
+                SearchResultActivity.start(context, it.query)
+                viewModel.recordSearchHistory(it.query)
                 keyboardController?.hide()
             }
         )
+    }
+}
 
-        NewsList(
-            articles = uiState.searchResult.collectAsLazyPagingItems(),
-            modifier = Modifier.weight(1f),
-            onToggleBookmark = {},
-            onArticleSelect = { headline ->
-                NewsDetailActivity.start(
-                    context,
-                    headline.url
-                )
-            }
-        )
+@Composable
+fun RecentSearchSection(histories: List<SearchHistory>, onClearSearchHistory: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        if (histories.isNotEmpty()) {
+            Text(
+                text = "Recent searches",
+                style = MaterialTheme.typography.subtitle2
+            )
+
+            Text(
+                text = "Clear",
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.clickable { onClearSearchHistory() }
+            )
+        }
     }
 }
 
@@ -177,55 +177,39 @@ fun SearchTextField(
 }
 
 @Composable
-fun SearchHistoryList(searchHistories: List<SearchHistory>, onChipSelect: (SearchHistory) -> Unit) {
-    LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.padding(16.dp)
-    ) {
+fun SearchHistoryList(searchHistories: List<SearchHistory>, onItemSelect: (SearchHistory) -> Unit) {
+    LazyColumn {
         items(searchHistories) {
-            Chip(history = it, onChipSelect = onChipSelect)
+            SearchHistoryItem(history = it, onItemClick = onItemSelect)
         }
     }
 }
 
 @Composable
-fun Chip(history: SearchHistory, onChipSelect: (SearchHistory) -> Unit) {
-    Surface(
-        modifier = Modifier.padding(end = 8.dp, bottom = 8.dp),
-        elevation = 8.dp,
-        shape = CircleShape,
-        border = BorderStroke(
-            width = 1.dp,
-            color = MaterialTheme.colors.onPrimary.copy(alpha = 0.7f)
-        ),
-        content = {
-            Text(
-                text = history.query, modifier = Modifier
-                    .clickable { onChipSelect(history) }
-                    .padding(8.dp)
-                    .defaultMinSize(24.dp, 24.dp)
-            )
-        }
+fun SearchHistoryItem(history: SearchHistory, onItemClick: (SearchHistory) -> Unit) {
+    Text(
+        text = history.query,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onItemClick(history) }
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
     )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun ChipPreview(@PreviewParameter(SearchHistoryProvider::class) history: SearchHistory) {
-    Chip(history, {})
+fun RecentSearchSectionPreview() {
+    RecentSearchSection(histories = emptyList(), onClearSearchHistory = {})
 }
-
 
 @Preview(showBackground = true)
 @Composable
-fun SearchViewPreview() {
-    SearchTextField(
-        "Aston Martin",
-        onTextChange = {},
-        onSearchClick = {},
-        onClearQuery = {}
-    )
+fun SearchHistoryItemPreview(@PreviewParameter(SearchHistoryProvider::class) history: SearchHistory) {
+    SearchHistoryItem(history, {})
 }
+
 
 @Preview(showBackground = true)
 @Composable

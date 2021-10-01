@@ -22,4 +22,8 @@ class SearchHistoryRepositoryImpl @Inject constructor(
     override suspend fun insert(searchHistory: SearchHistory) {
         localDataSource.insert(mapper.toEntity(searchHistory))
     }
+
+    override suspend fun deleteAllSearchHistory() {
+        localDataSource.deleteAll()
+    }
 }

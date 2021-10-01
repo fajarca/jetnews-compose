@@ -7,7 +7,7 @@ import java.util.*
 class SearchHistoryProvider : PreviewParameterProvider<SearchHistory> {
     override val values: Sequence<SearchHistory>
         get() = sequenceOf(
-            SearchHistory(1, "Aston Martin", Date())
+            SearchHistory("Aston Martin", Date())
         )
 
     override val count: Int

@@ -7,7 +7,6 @@ import io.fajarca.project.jetnews.domain.repository.NewsRepository
 import io.fajarca.project.jetnews.presentation.list.ArticleUiModel
 import io.fajarca.project.jetnews.util.constant.DateTimeFormat
 import io.fajarca.project.jetnews.util.date.DateManager
-import io.fajarca.project.jetnews.util.extension.getDifferenceInHours
 import io.fajarca.project.jetnews.util.extension.toDate
 import java.util.*
 import javax.inject.Inject
@@ -29,7 +28,6 @@ class SearchNewsUseCase @Inject constructor(
     }
 
     private fun formatPublishedAt(article: Article): ArticleUiModel {
-
         val timeDifference =
             dateManager.getTimeDifference(Date(), article.publishedAt.toDate(DateTimeFormat.FULL))
 
