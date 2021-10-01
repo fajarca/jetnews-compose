@@ -75,11 +75,11 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
             }
         )
 
-        RecentSearchSection(
-            histories = uiState.searchHistories,
-            onClearSearchHistory = { viewModel.clearSearchHistory() }
-        )
-
+        if (uiState.searchHistories.isNotEmpty()) {
+            RecentSearchSection(
+                onClearSearchHistory = { viewModel.clearSearchHistory() }
+            )
+        }
 
         val keyboardController = LocalSoftwareKeyboardController.current
         SearchHistoryList(
@@ -95,25 +95,22 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
 }
 
 @Composable
-fun RecentSearchSection(histories: List<SearchHistory>, onClearSearchHistory: () -> Unit) {
+fun RecentSearchSection(onClearSearchHistory: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        if (histories.isNotEmpty()) {
-            Text(
-                text = "Recent searches",
-                style = MaterialTheme.typography.subtitle2
-            )
-
-            Text(
-                text = "Clear",
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier.clickable { onClearSearchHistory() }
-            )
-        }
+        Text(
+            text = "Recent searches",
+            style = MaterialTheme.typography.subtitle2
+        )
+        Text(
+            text = "Clear",
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier.clickable { onClearSearchHistory() }
+        )
     }
 }
 
@@ -200,8 +197,8 @@ fun SearchHistoryItem(history: SearchHistory, onItemClick: (SearchHistory) -> Un
 
 @Preview(showBackground = true)
 @Composable
-fun RecentSearchSectionPreview() {
-    RecentSearchSection(histories = emptyList(), onClearSearchHistory = {})
+fun RecentSearchSectionPreview(@PreviewParameter(SearchHistoryProvider::class) history: SearchHistory) {
+    RecentSearchSection(onClearSearchHistory = {})
 }
 
 @Preview(showBackground = true)
