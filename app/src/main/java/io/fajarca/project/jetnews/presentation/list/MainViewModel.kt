@@ -31,7 +31,12 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getPosts() {
-        _uiState.update { uiState -> uiState.copy(articles = getTopHeadlinesUseCase.execute()) }
+        _uiState.update { uiState ->
+            uiState.copy(
+                isLoading = false,
+                articles = getTopHeadlinesUseCase.execute()
+            )
+        }
     }
 
     fun getNewsSource() {

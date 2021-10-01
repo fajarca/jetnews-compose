@@ -42,6 +42,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import io.fajarca.project.jetnews.presentation.bookmark.BookmarkActivity
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.search.SearchNewsActivity
@@ -54,19 +56,26 @@ import io.fajarca.project.jetnews.util.preview.ArticleProvider
 fun MainScreen(viewModel: MainViewModel) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        val context = LocalContext.current
-        AppBar(
-            onSearchClick = { SearchNewsActivity.start(context) },
-            onViewSavedBookmarkClick = { BookmarkActivity.start(context) }
-        )
-        ArticleList(
-            articles = uiState.articles.collectAsLazyPagingItems(),
-            modifier = Modifier.weight(1f),
-            onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
-            onArticleSelect = { article -> NewsDetailActivity.start(context, article.url) }
-        )
+    val pagingItems = uiState.articles.collectAsLazyPagingItems()
+    SwipeRefresh(
+        state = rememberSwipeRefreshState(isRefreshing = uiState.isLoading),
+        onRefresh = { pagingItems.refresh() }
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            val context = LocalContext.current
+            AppBar(
+                onSearchClick = { SearchNewsActivity.start(context) },
+                onViewSavedBookmarkClick = { BookmarkActivity.start(context) }
+            )
+            ArticleList(
+                articles = pagingItems,
+                modifier = Modifier.weight(1f),
+                onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
+                onArticleSelect = { article -> NewsDetailActivity.start(context, article.url) }
+            )
+        }
     }
+
 }
 
 @Composable
