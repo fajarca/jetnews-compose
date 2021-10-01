@@ -23,8 +23,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -42,6 +42,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
+import io.fajarca.project.jetnews.presentation.bookmark.BookmarkActivity
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.search.SearchNewsActivity
 import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
@@ -55,7 +56,10 @@ fun MainScreen(viewModel: MainViewModel) {
 
     Column(modifier = Modifier.fillMaxSize()) {
         val context = LocalContext.current
-        AppBar(onSearchClicked = { SearchNewsActivity.start(context) })
+        AppBar(
+            onSearchClick = { SearchNewsActivity.start(context) },
+            onViewSavedBookmarkClick = { BookmarkActivity.start(context) }
+        )
         ArticleList(
             articles = uiState.articles.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),
@@ -66,11 +70,17 @@ fun MainScreen(viewModel: MainViewModel) {
 }
 
 @Composable
-fun AppBar(onSearchClicked: () -> Unit) {
+fun AppBar(onSearchClick: () -> Unit, onViewSavedBookmarkClick: () -> Unit) {
     TopAppBar(title = { Text(text = "JetNews") }, actions = {
-        IconButton(onClick = onSearchClicked) {
-            Icon(Icons.Default.Search, null)
+        Row {
+            IconButton(onClick = onSearchClick) {
+                Icon(Icons.Outlined.Search, null)
+            }
+            IconButton(onClick = onViewSavedBookmarkClick) {
+                Icon(Icons.Outlined.BookmarkBorder, null)
+            }
         }
+
     })
 }
 
@@ -165,7 +175,7 @@ fun ArticleContent(article: ArticleUiModel, modifier: Modifier = Modifier) {
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
-                text = when(article.timeDifference) {
+                text = when (article.timeDifference) {
                     is TimeDifference.Day -> "${article.timeDifference.days} hari yang lalu"
                     is TimeDifference.Hours -> "${article.timeDifference.hours} jam yang lalu"
                     is TimeDifference.Minute -> "${article.timeDifference.minutes} menit yang lalu"
@@ -219,35 +229,35 @@ fun BannerNewsItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel) ->
 
 }
 
-@Preview("ArticleUiModel news (bookmarked)")
+@Preview("Article news (bookmarked)")
 @Composable
 fun MainScreenPreview() {
     MainScreen(hiltViewModel())
 }
 
 
-@Preview("ArticleUiModel news (bookmarked)")
+@Preview("Article news (bookmarked)")
 @Composable
-fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
+fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
     ArticleItem(article, {}, {})
 }
 
-@Preview("ArticleUiModel news")
+@Preview("Articlel news")
 @Composable
-fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
+fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
     ArticleItem(article, {}, {})
 }
 
 
-@Preview("ArticleUiModel news (dark)", uiMode = UI_MODE_NIGHT_YES)
+@Preview("Article news (dark)", uiMode = UI_MODE_NIGHT_YES)
 @Composable
-fun NewsItemBookmarkedDarkPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
+fun NewsItemBookmarkedDarkPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
     ArticleItem(article, {}, {})
 }
 
 
 @Preview("Banner Item Card")
 @Composable
-fun BannerItemCardPreview(@PreviewParameter(ArticleProvider::class) article : ArticleUiModel) {
+fun BannerItemCardPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
     BannerNewsItem(article, {})
 }

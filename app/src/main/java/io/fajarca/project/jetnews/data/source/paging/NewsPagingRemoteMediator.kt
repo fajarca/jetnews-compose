@@ -7,7 +7,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
 import io.fajarca.project.jetnews.data.db.AppDatabase
-import io.fajarca.project.jetnews.data.db.ArticleEntity
+import io.fajarca.project.jetnews.data.db.entity.ArticleEntity
 import io.fajarca.project.jetnews.data.mapper.ArticlesEntityMapper
 import io.fajarca.project.jetnews.data.source.NewsRemoteDataSource
 import io.fajarca.project.jetnews.util.extension.getOrNull

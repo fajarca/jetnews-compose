@@ -9,4 +9,5 @@ interface NewsRepository {
     suspend fun getNewsSource(): Flow<List<String>>
     suspend fun toggleBookmark(title: String): Int
     fun searchNews(query: String, language: String): Flow<PagingData<Article>>
+    suspend fun getBookmarkedNews() : Flow<List<Article>>
 }

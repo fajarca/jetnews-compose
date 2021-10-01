@@ -1,9 +1,8 @@
 package io.fajarca.project.jetnews.data.source
 
 import androidx.paging.PagingSource
-import io.fajarca.project.jetnews.data.db.ArticleDao
-import io.fajarca.project.jetnews.data.db.ArticleEntity
-import io.fajarca.project.jetnews.data.db.SearchHistoryDao
+import io.fajarca.project.jetnews.data.db.dao.ArticleDao
+import io.fajarca.project.jetnews.data.db.entity.ArticleEntity
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
@@ -21,5 +20,9 @@ class NewsLocalDataSource @Inject constructor(
 
     suspend fun toggleBookmark(title : String): Int {
         return dao.toggleBookmark(title)
+    }
+
+    fun findAllBookmarked(): Flow<List<ArticleEntity>> {
+        return dao.findAllBookmarked()
     }
 }

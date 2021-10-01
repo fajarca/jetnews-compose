@@ -1,40 +1,43 @@
-package io.fajarca.project.jetnews.presentation.search_result
+package io.fajarca.project.jetnews.presentation.bookmark
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.fajarca.project.jetnews.domain.usecase.article.SearchArticleUseCase
+import io.fajarca.project.jetnews.domain.usecase.article.GetBookmarkedArticlesUseCase
 import io.fajarca.project.jetnews.domain.usecase.article.ToggleBookmarkUseCase
 import io.fajarca.project.jetnews.presentation.list.ArticleUiModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class SearchResultUiModel(
-    val searchResult: Flow<PagingData<ArticleUiModel>> = flowOf(),
+data class BookmarkUiModel(
+    val articles: List<ArticleUiModel> = emptyList()
 )
 
 @HiltViewModel
-class SearchResultViewModel @Inject constructor(
-    private val searchArticleUseCase: SearchArticleUseCase,
+class BookmarkViewModel @Inject constructor(
+    private val getBookmarkedArticlesUseCase: GetBookmarkedArticlesUseCase,
     private val toggleBookmarkUseCase: ToggleBookmarkUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SearchResultUiModel())
-    val uiState: StateFlow<SearchResultUiModel> = _uiState
+    private val _uiState = MutableStateFlow(BookmarkUiModel())
+    val uiState: StateFlow<BookmarkUiModel> = _uiState
 
+    init {
+        getBookmarkedArticles()
+    }
 
-    fun searchNews(query: String, language: String) {
-        _uiState.update { uiState ->
-            val result = searchArticleUseCase.execute(query, language)
-            uiState.copy(searchResult = result)
+    private fun getBookmarkedArticles() {
+        viewModelScope.launch {
+            getBookmarkedArticlesUseCase.execute().collect {
+                _uiState.update { uiState -> uiState.copy(articles = it) }
+            }
         }
-
     }
 
     fun toggleBookmark(title: String) {
@@ -42,5 +45,4 @@ class SearchResultViewModel @Inject constructor(
             toggleBookmarkUseCase.execute(title)
         }
     }
-
 }

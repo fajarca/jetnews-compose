@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews.data.db
+package io.fajarca.project.jetnews.data.db.converter
 
 import androidx.room.TypeConverter
 import java.util.*

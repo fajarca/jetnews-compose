@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews.domain.usecase
+package io.fajarca.project.jetnews.domain.usecase.article
 
 import androidx.paging.PagingData
 import androidx.paging.map
@@ -13,13 +13,13 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class GetTopHeadlinesUseCase @Inject constructor(
+class SearchArticleUseCase @Inject constructor(
     private val repository: NewsRepository,
     private val dateManager: DateManager
 ) {
 
-    fun execute(): Flow<PagingData<ArticleUiModel>> {
-        return repository.getTopHeadlines()
+    fun execute(query: String, language: String): Flow<PagingData<ArticleUiModel>> {
+        return repository.searchNews(query, language)
             .map { pagingData ->
                 pagingData.map { headline ->
                     formatPublishedAt(headline)
@@ -28,7 +28,6 @@ class GetTopHeadlinesUseCase @Inject constructor(
     }
 
     private fun formatPublishedAt(article: Article): ArticleUiModel {
-
         val timeDifference =
             dateManager.getTimeDifference(Date(), article.publishedAt.toDate(DateTimeFormat.FULL))
 

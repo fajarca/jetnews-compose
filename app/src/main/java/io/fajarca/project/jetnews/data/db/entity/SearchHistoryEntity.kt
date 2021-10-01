@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews.data.db
+package io.fajarca.project.jetnews.data.db.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

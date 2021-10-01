@@ -1,7 +1,7 @@
 package io.fajarca.project.jetnews.data.source
 
-import io.fajarca.project.jetnews.data.db.SearchHistoryDao
-import io.fajarca.project.jetnews.data.db.SearchHistoryEntity
+import io.fajarca.project.jetnews.data.db.dao.SearchHistoryDao
+import io.fajarca.project.jetnews.data.db.entity.SearchHistoryEntity
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

@@ -4,9 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.fajarca.project.jetnews.domain.entity.SearchHistory
-import io.fajarca.project.jetnews.domain.usecase.ClearSearchHistoryUseCase
-import io.fajarca.project.jetnews.domain.usecase.GetSearchHistoryUseCase
-import io.fajarca.project.jetnews.domain.usecase.InsertSearchHistoryUseCase
+import io.fajarca.project.jetnews.domain.usecase.search_history.ClearSearchHistoryUseCase
+import io.fajarca.project.jetnews.domain.usecase.search_history.GetSearchHistoryUseCase
+import io.fajarca.project.jetnews.domain.usecase.search_history.InsertSearchHistoryUseCase
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

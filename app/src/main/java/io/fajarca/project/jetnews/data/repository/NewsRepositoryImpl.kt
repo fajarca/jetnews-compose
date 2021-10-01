@@ -61,4 +61,8 @@ class NewsRepositoryImpl @Inject constructor(
                 }
             }
     }
+
+    override suspend fun getBookmarkedNews(): Flow<List<Article>> {
+        return localDataSource.findAllBookmarked().map { entityMapper.fromEntities(it) }
+    }
 }

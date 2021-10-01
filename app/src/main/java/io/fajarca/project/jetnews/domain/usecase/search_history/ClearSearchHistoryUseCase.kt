@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews.domain.usecase
+package io.fajarca.project.jetnews.domain.usecase.search_history
 
 import io.fajarca.project.jetnews.domain.repository.SearchHistoryRepository
 import javax.inject.Inject

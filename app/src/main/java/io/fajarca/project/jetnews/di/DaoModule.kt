@@ -5,8 +5,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.fajarca.project.jetnews.data.db.AppDatabase
-import io.fajarca.project.jetnews.data.db.ArticleDao
-import io.fajarca.project.jetnews.data.db.SearchHistoryDao
+import io.fajarca.project.jetnews.data.db.dao.ArticleDao
+import io.fajarca.project.jetnews.data.db.dao.SearchHistoryDao
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -1,6 +1,6 @@
 package io.fajarca.project.jetnews.data.mapper
 
-import io.fajarca.project.jetnews.data.db.SearchHistoryEntity
+import io.fajarca.project.jetnews.data.db.entity.SearchHistoryEntity
 import io.fajarca.project.jetnews.domain.entity.SearchHistory
 import javax.inject.Inject
 

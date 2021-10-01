@@ -1,10 +1,11 @@
-package io.fajarca.project.jetnews.data.db
+package io.fajarca.project.jetnews.data.db.dao
 
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import io.fajarca.project.jetnews.data.db.entity.ArticleEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,4 +21,7 @@ abstract class ArticleDao {
 
     @Query("UPDATE top_headlines SET bookmark = NOT bookmark WHERE title = :title")
     abstract suspend fun toggleBookmark(title: String): Int
+
+    @Query("SELECT * FROM top_headlines WHERE bookmark = 1 ORDER BY published_at DESC")
+    abstract fun findAllBookmarked(): Flow<List<ArticleEntity>>
 }

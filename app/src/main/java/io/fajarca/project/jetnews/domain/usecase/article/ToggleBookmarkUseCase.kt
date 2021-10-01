@@ -1,4 +1,4 @@
-package io.fajarca.project.jetnews.domain.usecase
+package io.fajarca.project.jetnews.domain.usecase.article
 
 import io.fajarca.project.jetnews.domain.repository.NewsRepository
 import javax.inject.Inject
