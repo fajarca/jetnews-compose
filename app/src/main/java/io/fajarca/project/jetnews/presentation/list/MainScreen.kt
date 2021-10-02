@@ -172,13 +172,13 @@ fun ArticleContent(article: ArticleUiModel, modifier: Modifier = Modifier) {
             text = article.title,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.subtitle1
+            style = MaterialTheme.typography.subtitle1.copy(color = MaterialTheme.colors.onPrimary)
         )
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
                 text = article.source,
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.body2.copy(color = MaterialTheme.colors.onPrimary)
             )
         }
 
@@ -190,7 +190,7 @@ fun ArticleContent(article: ArticleUiModel, modifier: Modifier = Modifier) {
                     is TimeDifference.Minute -> "${article.timeDifference.minutes} menit yang lalu"
                     TimeDifference.Unknown -> "-"
                 },
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.body2.copy(color = MaterialTheme.colors.onPrimary),
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
@@ -205,6 +205,7 @@ fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
             Icon(
                 imageVector = if (isBookmarked) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                 contentDescription = if (isBookmarked) "Bookmarked" else "Unbookmark",
+                tint = MaterialTheme.colors.onPrimary
             )
         }
     }
@@ -223,14 +224,14 @@ fun BannerNewsItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel) ->
             text = article.title,
             maxLines = 3,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.subtitle1,
+            style = MaterialTheme.typography.subtitle1.copy(color = MaterialTheme.colors.onPrimary),
             modifier = Modifier.padding(8.dp)
         )
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
                 text = article.description,
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.body2.copy(color = MaterialTheme.colors.onPrimary),
                 modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
             )
         }
@@ -251,7 +252,7 @@ fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUi
     ArticleItem(article, {}, {})
 }
 
-@Preview("Articlel news")
+@Preview("Article news")
 @Composable
 fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
     ArticleItem(article, {}, {})
