@@ -3,14 +3,11 @@ package io.fajarca.project.jetnews.presentation.list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.fajarca.project.jetnews.domain.usecase.article.GetArticlesSourceUseCase
 import io.fajarca.project.jetnews.domain.usecase.article.GetTopHeadlinesUseCase
 import io.fajarca.project.jetnews.domain.usecase.article.ToggleBookmarkUseCase
-import io.fajarca.project.jetnews.infrastructure.coroutine.CoroutineDispatcherProvider
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -18,41 +15,33 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val getTopHeadlinesUseCase: GetTopHeadlinesUseCase,
-    private val getArticlesSourceUseCase: GetArticlesSourceUseCase,
-    private val toggleBookmarkUseCase: ToggleBookmarkUseCase,
-    private val coroutineDispatcherProvider: CoroutineDispatcherProvider,
+    private val toggleBookmarkUseCase: ToggleBookmarkUseCase
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(ArticleUiState(isLoading = true))
-    val uiState: StateFlow<ArticleUiState> = _uiState
+    private val _state = MutableStateFlow(ArticleViewState(loading = true))
+    val state: StateFlow<ArticleViewState> = _state
 
     init {
-        getPosts()
+        processEvent(MainViewEvent.FetchTopHeadlines)
     }
 
-    private fun getPosts() {
-        _uiState.update { uiState ->
-            uiState.copy(
-                isLoading = false,
-                articles = getTopHeadlinesUseCase.execute()
-            )
-        }
-    }
-
-    fun getNewsSource() {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
-            getArticlesSourceUseCase.execute().collect { sources ->
-                _uiState.update { uiState -> uiState.copy(isLoading = false, newsSource = sources) }
+    fun processEvent(event : MainViewEvent) {
+        when (event) {
+            is MainViewEvent.BookmarkArticle -> {
+                viewModelScope.launch {
+                    toggleBookmarkUseCase.execute(event.title)
+                }
             }
+            MainViewEvent.FetchTopHeadlines -> {
+                val articles = getTopHeadlinesUseCase.execute()
+                _state.update { uiState ->
+                    uiState.copy(
+                        loading = false,
+                        articles = articles
+                    )
+                }
 
+            }
         }
     }
-
-    fun toggleBookmark(title: String) {
-        viewModelScope.launch(coroutineDispatcherProvider.io) {
-            toggleBookmarkUseCase.execute(title)
-        }
-    }
-
-
 }

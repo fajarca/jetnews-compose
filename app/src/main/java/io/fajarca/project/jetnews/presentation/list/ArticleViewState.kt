@@ -4,8 +4,7 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-data class ArticleUiState(
+data class ArticleViewState(
     val articles : Flow<PagingData<ArticleUiModel>> = flowOf(),
-    val isLoading: Boolean,
-    val newsSource : List<String> = emptyList()
+    val loading: Boolean
 )

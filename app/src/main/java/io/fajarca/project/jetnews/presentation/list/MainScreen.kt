@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -51,31 +50,54 @@ import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicato
 import io.fajarca.project.jetnews.ui.components.RemoteImage
 import io.fajarca.project.jetnews.util.date.TimeDifference
 import io.fajarca.project.jetnews.util.preview.ArticleProvider
+import java.util.*
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.state.collectAsState()
 
     val pagingItems = uiState.articles.collectAsLazyPagingItems()
+    val context = LocalContext.current
+
+    MainScreen(
+        articles = pagingItems,
+        isLoading = uiState.loading,
+        onToggleBookmark = { title -> viewModel.processEvent(MainViewEvent.BookmarkArticle(title)) },
+        onArticleSelect = { article -> NewsDetailActivity.start(context, article.url) },
+        onPullRefresh = { pagingItems.refresh() },
+        onSearchClick = { SearchNewsActivity.start(context) },
+        onViewSavedBookmarkClick = { BookmarkActivity.start(context) }
+    )
+
+}
+
+@Composable
+fun MainScreen(
+    articles: LazyPagingItems<ArticleUiModel>,
+    isLoading: Boolean,
+    onToggleBookmark: (String) -> Unit,
+    onArticleSelect: (ArticleUiModel) -> Unit,
+    onPullRefresh: () -> Unit,
+    onSearchClick: () -> Unit,
+    onViewSavedBookmarkClick: () -> Unit
+) {
     SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing = uiState.isLoading),
-        onRefresh = { pagingItems.refresh() }
+        state = rememberSwipeRefreshState(isRefreshing = isLoading),
+        onRefresh = onPullRefresh
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            val context = LocalContext.current
             AppBar(
-                onSearchClick = { SearchNewsActivity.start(context) },
-                onViewSavedBookmarkClick = { BookmarkActivity.start(context) }
+                onSearchClick = onSearchClick,
+                onViewSavedBookmarkClick = onViewSavedBookmarkClick
             )
             ArticleList(
-                articles = pagingItems,
+                articles = articles,
                 modifier = Modifier.weight(1f),
-                onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
-                onArticleSelect = { article -> NewsDetailActivity.start(context, article.url) }
+                onToggleBookmark = onToggleBookmark,
+                onArticleSelect = onArticleSelect
             )
         }
     }
-
 }
 
 @Composable
@@ -104,7 +126,7 @@ fun ArticleList(
 
         itemsIndexed(lazyPagingItems = articles) { index, items ->
             if (index == 0) {
-                BannerNewsItem(
+                BannerArticleItem(
                     article = items ?: return@itemsIndexed,
                     onArticleSelect = onArticleSelect
                 )
@@ -212,7 +234,7 @@ fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun BannerNewsItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel) -> Unit) {
+fun BannerArticleItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel) -> Unit) {
     Column(modifier = Modifier.clickable { onArticleSelect(article) }) {
         RemoteImage(
             url = article.imageUrl,
@@ -239,35 +261,19 @@ fun BannerNewsItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel) ->
 
 }
 
-@Preview("Article news (bookmarked)")
+
+
+@Preview("Article banner item", showBackground = true)
+@Preview("Article banner item (dark)", uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-fun MainScreenPreview() {
-    MainScreen(hiltViewModel())
+fun ArticleBannerItemPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
+    BannerArticleItem(article, {})
 }
 
 
-@Preview("Article news (bookmarked)")
+@Preview("Article news", showBackground = true)
+@Preview("Article news (dark)", uiMode = UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
-fun NewsItemPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
+fun ArticleItemPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
     ArticleItem(article, {}, {})
-}
-
-@Preview("Article news")
-@Composable
-fun NewsItemBookmarkedPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
-    ArticleItem(article, {}, {})
-}
-
-
-@Preview("Article news (dark)", uiMode = UI_MODE_NIGHT_YES)
-@Composable
-fun NewsItemBookmarkedDarkPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
-    ArticleItem(article, {}, {})
-}
-
-
-@Preview("Banner Item Card")
-@Composable
-fun BannerItemCardPreview(@PreviewParameter(ArticleProvider::class) article: ArticleUiModel) {
-    BannerNewsItem(article, {})
 }
