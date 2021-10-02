@@ -1,5 +1,6 @@
 package io.fajarca.project.jetnews.presentation.search
 
+import android.content.res.Configuration
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,7 +46,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import io.fajarca.project.jetnews.domain.entity.SearchHistory
 import io.fajarca.project.jetnews.presentation.search_result.SearchResultActivity
+import io.fajarca.project.jetnews.ui.theme.JetNewsTheme
 import io.fajarca.project.jetnews.util.preview.SearchHistoryProvider
+import java.util.*
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -52,7 +56,39 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
     val uiState by viewModel.uiState.collectAsState()
 
     val context = LocalContext.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
+    SearchNewsScreen(
+        searchHistories = uiState.searchHistories,
+        text = uiState.text,
+        onNavigationIconClick = onNavigationIconClick,
+        onItemSelect = {
+            viewModel.onQueryChange(it.query)
+            SearchResultActivity.start(context, it.query)
+            viewModel.recordSearchHistory(it.query)
+            keyboardController?.hide()
+        },
+        onClearSearchHistory = { viewModel.clearSearchHistory() },
+        onTextChange = { text -> viewModel.onQueryChange(text) },
+        onSearchClick = { text ->
+            SearchResultActivity.start(context, text)
+            viewModel.recordSearchHistory(text)
+        },
+        onClearQuery = { viewModel.onQueryChange("") }
+    )
+}
+
+@Composable
+fun SearchNewsScreen(
+    searchHistories: List<SearchHistory>,
+    text: String,
+    onNavigationIconClick: () -> Unit,
+    onItemSelect: (SearchHistory) -> Unit,
+    onClearSearchHistory: () -> Unit,
+    onTextChange: (String) -> Unit,
+    onSearchClick: (String) -> Unit,
+    onClearQuery: () -> Unit
+) {
     Column(modifier = Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(text = "Search News") },
@@ -64,32 +100,23 @@ fun SearchNewsScreen(viewModel: SearchNewsViewModel, onNavigationIconClick: () -
             },
             actions = {
                 SearchTextField(
-                    uiState.text,
-                    onTextChange = { text -> viewModel.onQueryChange(text) },
-                    onSearchClick = { text ->
-                        SearchResultActivity.start(context, text)
-                        viewModel.recordSearchHistory(text)
-                    },
-                    onClearQuery = { viewModel.onQueryChange("") }
+                    text,
+                    onTextChange = onTextChange,
+                    onSearchClick = onSearchClick,
+                    onClearQuery = onClearQuery
                 )
             }
         )
 
-        if (uiState.searchHistories.isNotEmpty()) {
+        if (searchHistories.isNotEmpty()) {
             RecentSearchSection(
-                onClearSearchHistory = { viewModel.clearSearchHistory() }
+                onClearSearchHistory = onClearSearchHistory
             )
         }
 
-        val keyboardController = LocalSoftwareKeyboardController.current
         SearchHistoryList(
-            searchHistories = uiState.searchHistories,
-            onItemSelect = {
-                viewModel.onQueryChange(it.query)
-                SearchResultActivity.start(context, it.query)
-                viewModel.recordSearchHistory(it.query)
-                keyboardController?.hide()
-            }
+            searchHistories = searchHistories,
+            onItemSelect = onItemSelect
         )
     }
 }
@@ -104,11 +131,11 @@ fun RecentSearchSection(onClearSearchHistory: () -> Unit) {
     ) {
         Text(
             text = "Recent searches",
-            style = MaterialTheme.typography.subtitle2
+            style = MaterialTheme.typography.subtitle2.copy(color = MaterialTheme.colors.onPrimary)
         )
         Text(
             text = "Clear",
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.caption.copy(color = MaterialTheme.colors.onPrimary),
             modifier = Modifier.clickable { onClearSearchHistory() }
         )
     }
@@ -192,7 +219,27 @@ fun SearchHistoryItem(history: SearchHistory, onItemClick: (SearchHistory) -> Un
             .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+        style = MaterialTheme.typography.subtitle1.copy(color = MaterialTheme.colors.onPrimary)
     )
+}
+
+
+@Preview("Search news screen", showBackground = true)
+@Preview("Search news (dark)", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+fun SearchNewsScreenPreview() {
+    JetNewsTheme {
+        SearchNewsScreen(
+            searchHistories = listOf(SearchHistory("Aston Martin", Date())),
+            text = "Some search..",
+            onNavigationIconClick = {},
+            onItemSelect = {},
+            onClearSearchHistory = {},
+            onTextChange = {},
+            onSearchClick = {},
+            onClearQuery = {}
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -211,21 +258,24 @@ fun SearchHistoryItemPreview(@PreviewParameter(SearchHistoryProvider::class) his
 @Preview(showBackground = true)
 @Composable
 fun AppBarWithSearchViewPreview() {
-    TopAppBar(
-        title = {},
-        elevation = 6.dp,
-        navigationIcon = {
-            IconButton(onClick = {}) {
-                Icon(Icons.Outlined.ArrowBack, null)
+    JetNewsTheme {
+        TopAppBar(
+            title = {},
+            elevation = 6.dp,
+            navigationIcon = {
+                IconButton(onClick = {}) {
+                    Icon(Icons.Outlined.ArrowBack, null)
+                }
+            },
+            actions = {
+                SearchTextField(
+                    "Aston Martin",
+                    onTextChange = {},
+                    onSearchClick = {},
+                    onClearQuery = {}
+                )
             }
-        },
-        actions = {
-            SearchTextField(
-                "Aston Martin",
-                onTextChange = {},
-                onSearchClick = {},
-                onClearQuery = {}
-            )
-        }
-    )
+        )
+    }
 }
+
