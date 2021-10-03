@@ -26,12 +26,18 @@ class MainViewModel @Inject constructor(
 
     override fun handleEvent(event: MainContract.Event) {
         when (event) {
-            is MainContract.Event.BookmarkArticle -> toggleArticleBookmark(event.title)
+            is MainContract.Event.BookmarkArticle -> toggleArticleBookmark(event.article.title)
             MainContract.Event.FetchTopHeadlines -> getTopHeadlines()
+            is MainContract.Event.ArticleSelection -> {
+                setEffect { MainContract.Effect.Navigation.ToArticleDetail(event.article) }
+            }
+            MainContract.Event.PullRefresh -> setEffect { MainContract.Effect.PullRefresh }
+            MainContract.Event.SearchArticle -> setEffect { MainContract.Effect.Navigation.ToSearchArticleScreen }
+            MainContract.Event.ViewBookmarkedArticle -> setEffect { MainContract.Effect.Navigation.ToBookmarkScreen }
         }
     }
 
-    private fun toggleArticleBookmark(title : String) {
+    private fun toggleArticleBookmark(title: String) {
         viewModelScope.launch {
             toggleBookmarkUseCase.execute(title)
         }

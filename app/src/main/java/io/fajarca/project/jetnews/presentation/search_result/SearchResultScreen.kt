@@ -38,7 +38,7 @@ fun SearchResultScreen(query : String, viewModel: SearchResultViewModel, onNavig
         ArticleList(
             articles = uiState.searchResult.collectAsLazyPagingItems(),
             modifier = Modifier.weight(1f),
-            onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
+            onToggleBookmark = { article -> viewModel.toggleBookmark(article.title) },
             onArticleSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
         )
     }

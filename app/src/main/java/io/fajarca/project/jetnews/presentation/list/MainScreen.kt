@@ -27,6 +27,7 @@ import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -52,51 +53,80 @@ import io.fajarca.project.jetnews.ui.components.RemoteImage
 import io.fajarca.project.jetnews.util.date.TimeDifference
 import io.fajarca.project.jetnews.util.preview.ArticleUiModelProvider
 import java.util.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.onEach
 
 @Composable
 fun MainScreen(viewModel: MainViewModel) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    val pagingItems = uiState.articles.collectAsLazyPagingItems()
+    val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
     MainScreen(
-        articles = pagingItems,
-        isLoading = uiState.loading,
-        onToggleBookmark = { title -> viewModel.setEvent(MainContract.Event.BookmarkArticle(title)) },
-        onArticleSelect = { article -> NewsDetailActivity.start(context, article.url) },
-        onPullRefresh = { pagingItems.refresh() },
-        onSearchClick = { SearchNewsActivity.start(context) },
-        onViewSavedBookmarkClick = { BookmarkActivity.start(context) }
+        state = state,
+        effectFlow = viewModel.effect,
+        onEventSent = { event -> viewModel.setEvent(event) },
+        onNavigationRequested = { navigation ->
+            when (navigation) {
+                is MainContract.Effect.Navigation.ToArticleDetail -> NewsDetailActivity.start(context, navigation.article.url)
+                MainContract.Effect.Navigation.ToSearchArticleScreen -> SearchNewsActivity.start(context)
+                MainContract.Effect.Navigation.ToBookmarkScreen -> BookmarkActivity.start(context)
+            }
+        }
     )
 
 }
 
 @Composable
 fun MainScreen(
-    articles: LazyPagingItems<ArticleUiModel>,
-    isLoading: Boolean,
-    onToggleBookmark: (String) -> Unit,
-    onArticleSelect: (ArticleUiModel) -> Unit,
-    onPullRefresh: () -> Unit,
-    onSearchClick: () -> Unit,
-    onViewSavedBookmarkClick: () -> Unit
+    state: MainContract.State,
+    effectFlow: Flow<MainContract.Effect>,
+    onEventSent: (event: MainContract.Event) -> Unit,
+    onNavigationRequested: (MainContract.Effect.Navigation) -> Unit
 ) {
+    val articles = state.articles.collectAsLazyPagingItems()
+
+    LaunchedEffect(key1 = "id") {
+        effectFlow
+            .onEach { effect ->
+                when (effect) {
+                    is MainContract.Effect.Navigation.ToArticleDetail -> onNavigationRequested(effect)
+                    MainContract.Effect.Navigation.ToSearchArticleScreen -> onNavigationRequested(MainContract.Effect.Navigation.ToSearchArticleScreen)
+                    MainContract.Effect.Navigation.ToBookmarkScreen -> onNavigationRequested(MainContract.Effect.Navigation.ToBookmarkScreen)
+                    MainContract.Effect.ShowToast -> {}
+                    MainContract.Effect.PullRefresh -> articles.refresh()
+                }
+            }
+            .collect()
+    }
+
     SwipeRefresh(
-        state = rememberSwipeRefreshState(isRefreshing = isLoading),
-        onRefresh = onPullRefresh
+        state = rememberSwipeRefreshState(isRefreshing = state.loading),
+        onRefresh = { onEventSent(MainContract.Event.PullRefresh) }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppBar(
-                onSearchClick = onSearchClick,
-                onViewSavedBookmarkClick = onViewSavedBookmarkClick
+                onSearchClick = { onEventSent(MainContract.Event.SearchArticle) },
+                onViewSavedBookmarkClick = { onEventSent(MainContract.Event.ViewBookmarkedArticle) }
             )
             ArticleList(
                 articles = articles,
                 modifier = Modifier.weight(1f),
-                onToggleBookmark = onToggleBookmark,
-                onArticleSelect = onArticleSelect
+                onToggleBookmark = { article ->
+                    onEventSent(
+                        MainContract.Event.BookmarkArticle(
+                            article
+                        )
+                    )
+                },
+                onArticleSelect = { article ->
+                    onEventSent(
+                        MainContract.Event.ArticleSelection(
+                            article
+                        )
+                    )
+                }
             )
         }
     }
@@ -121,7 +151,7 @@ fun AppBar(onSearchClick: () -> Unit, onViewSavedBookmarkClick: () -> Unit) {
 fun ArticleList(
     articles: LazyPagingItems<ArticleUiModel>,
     modifier: Modifier = Modifier,
-    onToggleBookmark: (String) -> Unit,
+    onToggleBookmark: (ArticleUiModel) -> Unit,
     onArticleSelect: (ArticleUiModel) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
@@ -161,7 +191,7 @@ fun ArticleList(
 @Composable
 fun ArticleItem(
     article: ArticleUiModel,
-    onToggleBookmark: (String) -> Unit,
+    onToggleBookmark: (ArticleUiModel) -> Unit,
     onSelectArticle: (ArticleUiModel) -> Unit
 ) {
     Row(
@@ -183,7 +213,7 @@ fun ArticleItem(
 
         BookmarkButton(
             isBookmarked = article.isBookmarked,
-            onClick = { onToggleBookmark(article.title) }
+            onClick = { onToggleBookmark(article) }
         )
 
     }
@@ -240,7 +270,9 @@ fun BannerArticleItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel)
     Column(modifier = Modifier.clickable { onArticleSelect(article) }) {
         RemoteImage(
             url = article.imageUrl,
-            modifier = Modifier.fillMaxWidth().height(220.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(220.dp),
             contentScale = ContentScale.FillBounds
         )
 
@@ -268,13 +300,10 @@ fun BannerArticleItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel)
 @Composable
 fun MainScreenPreview() {
     MainScreen(
-        articles = flowOf(PagingData.empty<ArticleUiModel>()).collectAsLazyPagingItems(),
-        isLoading = false,
-        onToggleBookmark = {},
-        onArticleSelect = {},
-        onPullRefresh = {},
-        onSearchClick = {},
-        onViewSavedBookmarkClick = {}
+        state = MainContract.State(true, flowOf()),
+        effectFlow = flowOf(MainContract.Effect.PullRefresh),
+        onEventSent = {},
+        onNavigationRequested = {}
     )
 }
 

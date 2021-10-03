@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel<Event : UiEvent, State : UiState, Effect : UiEffect> : ViewModel() {
+abstract class BaseViewModel<Event : ViewEvent, State : ViewState, Effect : ViewEffect> : ViewModel() {
 
     private val initialState: State by lazy { createInitialState() }
 

@@ -52,7 +52,7 @@ fun BookmarkScreen(viewModel: BookmarkViewModel, onNavigationIconClick: () -> Un
         BookmarkedArticleList(
             articles = uiState.articles,
             modifier = Modifier.weight(1f),
-            onToggleBookmark = { title -> viewModel.toggleBookmark(title) },
+            onToggleBookmark = { article -> viewModel.toggleBookmark(article.title) },
             onArticleSelect = { headline -> NewsDetailActivity.start(context, headline.url) }
         )
     }
@@ -63,7 +63,7 @@ fun BookmarkScreen(viewModel: BookmarkViewModel, onNavigationIconClick: () -> Un
 fun BookmarkedArticleList(
     articles: List<ArticleUiModel>,
     modifier: Modifier = Modifier,
-    onToggleBookmark: (String) -> Unit,
+    onToggleBookmark: (ArticleUiModel) -> Unit,
     onArticleSelect: (ArticleUiModel) -> Unit
 ) {
 
