@@ -4,7 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import io.fajarca.project.jetnews.presentation.list.ArticleUiModel
 import io.fajarca.project.jetnews.util.date.TimeDifference
 
-class ArticleProvider : PreviewParameterProvider<ArticleUiModel> {
+class ArticleUiModelProvider : PreviewParameterProvider<ArticleUiModel> {
     override val values: Sequence<ArticleUiModel>
         get() = sequenceOf(
             ArticleUiModel(
