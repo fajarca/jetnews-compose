@@ -43,7 +43,7 @@ abstract class BaseViewModel<Event : UiEvent, State : UiState, Effect : UiEffect
         subscribeEvent()
     }
 
-    val currentState: State
+    private val currentState: State
         get() = _uiState.value
 
 
