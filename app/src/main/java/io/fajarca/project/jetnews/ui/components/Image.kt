@@ -19,11 +19,14 @@ fun RemoteImage(
     contentScale: ContentScale = ContentScale.Fit
 ) {
     Image(
-        painter = rememberImagePainter(data = url, builder = {
-            crossfade(true)
-            placeholder(ColorDrawable(Color.LTGRAY))
-            error(R.drawable.ic_broken_image)
-        }),
+        painter = rememberImagePainter(
+            data = url,
+            builder = {
+                crossfade(true)
+                placeholder(ColorDrawable(Color.LTGRAY))
+                error(R.drawable.ic_broken_image)
+            }
+        ),
         contentDescription = null,
         modifier = modifier,
         alignment = Alignment.Center,

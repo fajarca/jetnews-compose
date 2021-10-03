@@ -240,7 +240,7 @@ fun BannerArticleItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel)
     Column(modifier = Modifier.clickable { onArticleSelect(article) }) {
         RemoteImage(
             url = article.imageUrl,
-            modifier = Modifier.height(220.dp),
+            modifier = Modifier.fillMaxWidth().height(220.dp),
             contentScale = ContentScale.FillBounds
         )
 
