@@ -39,7 +39,7 @@ class NewsRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun getNewsSource(): Flow<List<String>> {
+    override suspend fun getArticleSource(): Flow<List<String>> {
         return localDataSource.findAllNewsSource()
     }
 
@@ -48,7 +48,7 @@ class NewsRepositoryImpl @Inject constructor(
     }
 
     @OptIn(ExperimentalPagingApi::class)
-    override fun searchNews(query: String, language: String): Flow<PagingData<Article>> {
+    override fun searchArticle(query: String, language: String): Flow<PagingData<Article>> {
         return Pager(PagingConfig(pageSize = 10, initialLoadSize = 2 * 10)) {
             NewsPagingRemoteDataSource { page, pageSize ->
                 remoteDataSource.search(query, language, page, pageSize)
@@ -62,7 +62,11 @@ class NewsRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun getBookmarkedNews(): Flow<List<Article>> {
+    override suspend fun getBookmarkedArticles(): Flow<List<Article>> {
         return localDataSource.findAllBookmarked().map { entityMapper.fromEntities(it) }
+    }
+
+    override suspend fun getBookmarkedArticlesCount(): Flow<Int> {
+        return localDataSource.findBookmarkedArticleCount()
     }
 }

@@ -13,11 +13,15 @@ class MainContract {
         object ViewBookmarkedArticle : Event()
         object SearchArticle : Event()
         object PullRefresh : Event()
-        data class BookmarkArticle(val article : ArticleUiModel) : Event()
-        data class ArticleSelection(val article : ArticleUiModel) : Event()
+        data class BookmarkArticle(val article: ArticleUiModel) : Event()
+        data class ArticleSelection(val article: ArticleUiModel) : Event()
     }
 
-    data class State(val loading : Boolean, val articles : Flow<PagingData<ArticleUiModel>>) : ViewState
+    data class State(
+        val loading: Boolean,
+        val articles: Flow<PagingData<ArticleUiModel>>,
+        val bookmarkCount: Int
+    ) : ViewState
 
     sealed class Effect : ViewEffect {
 

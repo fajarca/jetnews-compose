@@ -25,4 +25,10 @@ class NewsLocalDataSource @Inject constructor(
     fun findAllBookmarked(): Flow<List<ArticleEntity>> {
         return dao.findAllBookmarked()
     }
+
+    fun findBookmarkedArticleCount(): Flow<Int> {
+        return dao.findBookmarkedArticleCount()
+    }
+
+
 }

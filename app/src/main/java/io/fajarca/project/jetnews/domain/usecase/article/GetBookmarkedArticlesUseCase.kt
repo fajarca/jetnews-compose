@@ -17,7 +17,7 @@ class GetBookmarkedArticlesUseCase @Inject constructor(
 ) {
 
     suspend fun execute(): Flow<List<ArticleUiModel>> {
-        return repository.getBookmarkedNews()
+        return repository.getBookmarkedArticles()
             .map { articles -> formatPublishedAt(articles) }
     }
 

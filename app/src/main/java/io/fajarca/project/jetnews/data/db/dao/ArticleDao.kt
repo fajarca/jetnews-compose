@@ -24,4 +24,7 @@ abstract class ArticleDao {
 
     @Query("SELECT * FROM top_headlines WHERE bookmark = 1 ORDER BY published_at DESC")
     abstract fun findAllBookmarked(): Flow<List<ArticleEntity>>
+
+    @Query("SELECT COUNT(*) FROM top_headlines WHERE bookmark = 1")
+    abstract fun findBookmarkedArticleCount(): Flow<Int>
 }

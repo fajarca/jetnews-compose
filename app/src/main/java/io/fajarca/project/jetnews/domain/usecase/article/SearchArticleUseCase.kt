@@ -19,7 +19,7 @@ class SearchArticleUseCase @Inject constructor(
 ) {
 
     fun execute(query: String, language: String): Flow<PagingData<ArticleUiModel>> {
-        return repository.searchNews(query, language)
+        return repository.searchArticle(query, language)
             .map { pagingData ->
                 pagingData.map { headline ->
                     formatPublishedAt(headline)

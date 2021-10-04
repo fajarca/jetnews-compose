@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class GetArticlesSourceUseCase @Inject constructor(private val repository: NewsRepository){
 
     suspend fun execute(): Flow<List<String>> {
-        return repository.getNewsSource()
+        return repository.getArticleSource()
     }
 
 }

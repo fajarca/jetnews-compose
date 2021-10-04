@@ -1,26 +1,33 @@
 package io.fajarca.project.jetnews.presentation.list
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BadgeBox
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.IconToggleButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
@@ -30,14 +37,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -54,6 +64,7 @@ import io.fajarca.project.jetnews.util.preview.ArticleUiModelProvider
 import java.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 
@@ -119,6 +130,7 @@ fun MainScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             AppBar(
+                bookmarkCount = state.bookmarkCount,
                 onSearchClick = { onEventSent(MainContract.Event.SearchArticle) },
                 onViewSavedBookmarkClick = { onEventSent(MainContract.Event.ViewBookmarkedArticle) }
             )
@@ -136,28 +148,30 @@ fun MainScreen(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AppBar(onSearchClick: () -> Unit, onViewSavedBookmarkClick: () -> Unit) {
-    TopAppBar(title = { Text(text = "JetNews") }, actions = {
-        Row {
+fun AppBar(bookmarkCount: Int, onSearchClick: () -> Unit, onViewSavedBookmarkClick: () -> Unit) {
+
+    io.fajarca.project.jetnews.ui.components.AppBar(
+        title = "JetNews",
+        actions = {
+            BookmarkBadgeCount(
+                bookmarkCount = bookmarkCount,
+                onViewSavedBookmarkClick = onViewSavedBookmarkClick
+            )
+
             IconButton(onClick = onSearchClick) {
                 Icon(
+                    modifier = Modifier.padding(top = 2.dp),
                     imageVector = Icons.Outlined.Search,
                     contentDescription = null,
                     tint = MaterialTheme.colors.onPrimary
                 )
             }
-            IconButton(onClick = onViewSavedBookmarkClick) {
-                Icon(
-                    imageVector = Icons.Outlined.BookmarkBorder,
-                    contentDescription = null,
-                    tint = MaterialTheme.colors.onPrimary
-                )
-            }
         }
-
-    })
+    )
 }
+
 
 @Composable
 fun ArticleList(
@@ -278,6 +292,35 @@ fun BookmarkButton(isBookmarked: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
+fun BookmarkBadgeCount(bookmarkCount: Int, onViewSavedBookmarkClick: () -> Unit) {
+    IconButton(onClick = onViewSavedBookmarkClick) {
+        Box {
+            Icon(
+                modifier = Modifier.padding(top = 2.dp),
+                imageVector = Icons.Outlined.BookmarkBorder,
+                contentDescription = null,
+                tint = MaterialTheme.colors.onPrimary
+            )
+            if (bookmarkCount > 0) {
+                Text(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.Red)
+                        .padding(start = 4.dp, end = 4.dp, top = 3.dp, bottom = 3.dp)
+                        .align(Alignment.TopEnd),
+                    color = Color.White,
+                    text = if (bookmarkCount > 9) "9+" else bookmarkCount.toString(),
+                    style = MaterialTheme.typography.caption.copy(fontSize = 8.sp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
 fun BannerArticleItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel) -> Unit) {
     Column(modifier = Modifier.clickable { onArticleSelect(article) }) {
         RemoteImage(
@@ -312,7 +355,7 @@ fun BannerArticleItem(article: ArticleUiModel, onArticleSelect: (ArticleUiModel)
 @Composable
 fun MainScreenPreview() {
     MainScreen(
-        state = MainContract.State(true, flowOf()),
+        state = MainContract.State(true, flowOf(), 4),
         effectFlow = flowOf(MainContract.Effect.PullRefresh),
         onEventSent = {},
         onNavigationRequested = {}
@@ -332,4 +375,10 @@ fun ArticleBannerItemPreview(@PreviewParameter(ArticleUiModelProvider::class) ar
 @Composable
 fun ArticleItemPreview(@PreviewParameter(ArticleUiModelProvider::class) article: ArticleUiModel) {
     ArticleItem(article, {}, {})
+}
+
+@Preview("Badge Count")
+@Composable
+fun BookmarkBadgeCountPreview() {
+    BookmarkBadgeCount(bookmarkCount = 90) {}
 }
