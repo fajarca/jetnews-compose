@@ -39,7 +39,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
-import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
@@ -69,8 +68,13 @@ fun MainScreen(viewModel: MainViewModel) {
         onEventSent = { event -> viewModel.setEvent(event) },
         onNavigationRequested = { navigation ->
             when (navigation) {
-                is MainContract.Effect.Navigation.ToArticleDetail -> NewsDetailActivity.start(context, navigation.article.url)
-                MainContract.Effect.Navigation.ToSearchArticleScreen -> SearchNewsActivity.start(context)
+                is MainContract.Effect.Navigation.ToArticleDetail -> NewsDetailActivity.start(
+                    context,
+                    navigation.article.url
+                )
+                MainContract.Effect.Navigation.ToSearchArticleScreen -> SearchNewsActivity.start(
+                    context
+                )
                 MainContract.Effect.Navigation.ToBookmarkScreen -> BookmarkActivity.start(context)
             }
         }
@@ -87,14 +91,22 @@ fun MainScreen(
 ) {
     val articles = state.articles.collectAsLazyPagingItems()
 
-    LaunchedEffect(key1 = "id") {
+    //A LaunchedEffect guarantees that the coroutine is launched only once and not on every recomposition
+    LaunchedEffect(Unit) {
         effectFlow
             .onEach { effect ->
                 when (effect) {
-                    is MainContract.Effect.Navigation.ToArticleDetail -> onNavigationRequested(effect)
-                    MainContract.Effect.Navigation.ToSearchArticleScreen -> onNavigationRequested(MainContract.Effect.Navigation.ToSearchArticleScreen)
-                    MainContract.Effect.Navigation.ToBookmarkScreen -> onNavigationRequested(MainContract.Effect.Navigation.ToBookmarkScreen)
-                    MainContract.Effect.ShowToast -> {}
+                    is MainContract.Effect.Navigation.ToArticleDetail -> onNavigationRequested(
+                        effect
+                    )
+                    MainContract.Effect.Navigation.ToSearchArticleScreen -> onNavigationRequested(
+                        MainContract.Effect.Navigation.ToSearchArticleScreen
+                    )
+                    MainContract.Effect.Navigation.ToBookmarkScreen -> onNavigationRequested(
+                        MainContract.Effect.Navigation.ToBookmarkScreen
+                    )
+                    MainContract.Effect.ShowToast -> {
+                    }
                     MainContract.Effect.PullRefresh -> articles.refresh()
                 }
             }
@@ -114,18 +126,10 @@ fun MainScreen(
                 articles = articles,
                 modifier = Modifier.weight(1f),
                 onToggleBookmark = { article ->
-                    onEventSent(
-                        MainContract.Event.BookmarkArticle(
-                            article
-                        )
-                    )
+                    onEventSent(MainContract.Event.BookmarkArticle(article))
                 },
                 onArticleSelect = { article ->
-                    onEventSent(
-                        MainContract.Event.ArticleSelection(
-                            article
-                        )
-                    )
+                    onEventSent(MainContract.Event.ArticleSelection(article))
                 }
             )
         }
@@ -137,10 +141,18 @@ fun AppBar(onSearchClick: () -> Unit, onViewSavedBookmarkClick: () -> Unit) {
     TopAppBar(title = { Text(text = "JetNews") }, actions = {
         Row {
             IconButton(onClick = onSearchClick) {
-                Icon(Icons.Outlined.Search, null)
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onPrimary
+                )
             }
             IconButton(onClick = onViewSavedBookmarkClick) {
-                Icon(Icons.Outlined.BookmarkBorder, null)
+                Icon(
+                    imageVector = Icons.Outlined.BookmarkBorder,
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onPrimary
+                )
             }
         }
 
