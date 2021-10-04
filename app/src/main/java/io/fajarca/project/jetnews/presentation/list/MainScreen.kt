@@ -1,14 +1,12 @@
 package io.fajarca.project.jetnews.presentation.list
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BadgeBox
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
@@ -26,12 +23,14 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.IconToggleButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -57,6 +56,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import io.fajarca.project.jetnews.presentation.bookmark.BookmarkActivity
 import io.fajarca.project.jetnews.presentation.detail.NewsDetailActivity
 import io.fajarca.project.jetnews.presentation.search.SearchNewsActivity
+import io.fajarca.project.jetnews.ui.components.AppBar
 import io.fajarca.project.jetnews.ui.components.CenteredCircularProgressIndicator
 import io.fajarca.project.jetnews.ui.components.RemoteImage
 import io.fajarca.project.jetnews.util.date.TimeDifference
@@ -64,7 +64,6 @@ import io.fajarca.project.jetnews.util.preview.ArticleUiModelProvider
 import java.util.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.onEach
 
@@ -72,24 +71,38 @@ import kotlinx.coroutines.flow.onEach
 fun MainScreen(viewModel: MainViewModel) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val scaffoldState: ScaffoldState = rememberScaffoldState()
 
-    MainScreen(
-        state = state,
-        effectFlow = viewModel.effect,
-        onEventSent = { event -> viewModel.setEvent(event) },
-        onNavigationRequested = { navigation ->
-            when (navigation) {
-                is MainContract.Effect.Navigation.ToArticleDetail -> NewsDetailActivity.start(
-                    context,
-                    navigation.article.url
-                )
-                MainContract.Effect.Navigation.ToSearchArticleScreen -> SearchNewsActivity.start(
-                    context
-                )
-                MainContract.Effect.Navigation.ToBookmarkScreen -> BookmarkActivity.start(context)
-            }
-        }
-    )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                bookmarkCount = state.bookmarkCount,
+                onSearchClick = { viewModel.setEvent(MainContract.Event.SearchArticle) },
+                onViewSavedBookmarkClick = { viewModel.setEvent(MainContract.Event.ViewBookmarkedArticle) }
+            )
+        },
+        scaffoldState = scaffoldState
+    ) {
+        MainScreen(
+            state = state,
+            effectFlow = viewModel.effect,
+            onEventSent = { event -> viewModel.setEvent(event) },
+            onNavigationRequested = { navigation ->
+                when (navigation) {
+                    is MainContract.Effect.Navigation.ToArticleDetail -> NewsDetailActivity.start(
+                        context,
+                        navigation.article.url
+                    )
+                    MainContract.Effect.Navigation.ToSearchArticleScreen -> SearchNewsActivity.start(
+                        context
+                    )
+                    MainContract.Effect.Navigation.ToBookmarkScreen -> BookmarkActivity.start(context)
+                }
+            },
+            scaffoldState = scaffoldState
+        )
+    }
+
 
 }
 
@@ -98,7 +111,8 @@ fun MainScreen(
     state: MainContract.State,
     effectFlow: Flow<MainContract.Effect>,
     onEventSent: (event: MainContract.Event) -> Unit,
-    onNavigationRequested: (MainContract.Effect.Navigation) -> Unit
+    onNavigationRequested: (MainContract.Effect.Navigation) -> Unit,
+    scaffoldState: ScaffoldState
 ) {
     val articles = state.articles.collectAsLazyPagingItems()
 
@@ -116,7 +130,8 @@ fun MainScreen(
                     MainContract.Effect.Navigation.ToBookmarkScreen -> onNavigationRequested(
                         MainContract.Effect.Navigation.ToBookmarkScreen
                     )
-                    MainContract.Effect.ShowToast -> {
+                    MainContract.Effect.ShowRefreshSuccessSnackBar -> {
+                        scaffoldState.snackbarHostState.showSnackbar("Successfully refreshed")
                     }
                     MainContract.Effect.PullRefresh -> articles.refresh()
                 }
@@ -128,31 +143,23 @@ fun MainScreen(
         state = rememberSwipeRefreshState(isRefreshing = state.loading),
         onRefresh = { onEventSent(MainContract.Event.PullRefresh) }
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            AppBar(
-                bookmarkCount = state.bookmarkCount,
-                onSearchClick = { onEventSent(MainContract.Event.SearchArticle) },
-                onViewSavedBookmarkClick = { onEventSent(MainContract.Event.ViewBookmarkedArticle) }
-            )
-            ArticleList(
-                articles = articles,
-                modifier = Modifier.weight(1f),
-                onToggleBookmark = { article ->
-                    onEventSent(MainContract.Event.BookmarkArticle(article))
-                },
-                onArticleSelect = { article ->
-                    onEventSent(MainContract.Event.ArticleSelection(article))
-                }
-            )
-        }
+        ArticleList(
+            articles = articles,
+            modifier = Modifier.fillMaxSize(),
+            onToggleBookmark = { article ->
+                onEventSent(MainContract.Event.BookmarkArticle(article))
+            },
+            onArticleSelect = { article ->
+                onEventSent(MainContract.Event.ArticleSelection(article))
+            }
+        )
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AppBar(bookmarkCount: Int, onSearchClick: () -> Unit, onViewSavedBookmarkClick: () -> Unit) {
-
-    io.fajarca.project.jetnews.ui.components.AppBar(
+fun TopAppBar(bookmarkCount: Int, onSearchClick: () -> Unit, onViewSavedBookmarkClick: () -> Unit) {
+    AppBar(
         title = "JetNews",
         actions = {
             BookmarkBadgeCount(
@@ -358,7 +365,8 @@ fun MainScreenPreview() {
         state = MainContract.State(true, flowOf(), 4),
         effectFlow = flowOf(MainContract.Effect.PullRefresh),
         onEventSent = {},
-        onNavigationRequested = {}
+        onNavigationRequested = {},
+        scaffoldState = rememberScaffoldState()
     )
 }
 

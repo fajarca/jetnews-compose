@@ -35,7 +35,10 @@ class MainViewModel @Inject constructor(
             is MainContract.Event.ArticleSelection -> {
                 setEffect { MainContract.Effect.Navigation.ToArticleDetail(event.article) }
             }
-            MainContract.Event.PullRefresh -> setEffect { MainContract.Effect.PullRefresh }
+            MainContract.Event.PullRefresh -> {
+                setEffect { MainContract.Effect.ShowRefreshSuccessSnackBar }
+                setEffect { MainContract.Effect.PullRefresh }
+            }
             MainContract.Event.SearchArticle -> setEffect { MainContract.Effect.Navigation.ToSearchArticleScreen }
             MainContract.Event.ViewBookmarkedArticle -> setEffect { MainContract.Effect.Navigation.ToBookmarkScreen }
         }

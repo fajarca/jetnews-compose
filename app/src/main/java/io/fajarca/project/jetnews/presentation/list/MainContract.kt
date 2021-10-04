@@ -25,7 +25,7 @@ class MainContract {
 
     sealed class Effect : ViewEffect {
 
-        object ShowToast : Effect()
+        object ShowRefreshSuccessSnackBar : Effect()
         object PullRefresh : Effect()
 
         sealed class Navigation : Effect() {
